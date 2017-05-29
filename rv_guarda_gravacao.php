@@ -22,7 +22,7 @@ $arquivo = pathinfo($arquivo_caminho);
 
 list($sys_path, $dir_rec, $assinante_id, $linha_id, $rec_tipo) = explode('/', substr($arquivo['dirname'], 1)) ;
 
-///home/rv_gravacoes/12/14/internas/internas-20180373-2000-1494941018_131-10_20_10_20_2017.wav49
+////home/rv_gravacoes/12/14/internas/internas-20180373-2000-1494941018_131-10_20_10_20_2017.wav49
 
 list($rec_tipo, $callerid, $exten, $unique_id, $data) = explode('-', $arquivo['filename']);
 
