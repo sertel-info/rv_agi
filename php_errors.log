@@ -1,0 +1,2 @@
+[25-Apr-2017 15:07:45 America/Sao_Paulo] PHP Fatal error:  Cannot redeclare Numero::$codArea in Numero.php on line 12
+[25-Apr-2017 15:07:56 America/Sao_Paulo] PHP Parse error:  syntax error, unexpected ';' in Numero.php on line 128
