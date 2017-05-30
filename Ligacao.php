@@ -86,7 +86,7 @@ class Ligacao {
 		}
 
 		$pasta = $this->tipo_rec;
-		$exten = $this->exten->getNumeroCompleto();
+		$exten = $this->exten->getNumeroComDDD();
 		$callerid = $this->callerid->getNumeroCompleto();
 		$unique_id = $this->unique_id;
 		$tipo_rec = $this->tipo_rec;

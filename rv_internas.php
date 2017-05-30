@@ -29,6 +29,8 @@ $ligacao->setAgi($agi);
 $callerid = new Numero($agi->get_variable("CALLERID(num)")['data']);
 $exten = new Numero($agi->get_variable("EXTEN")['data']);
 
+$agi->set_variable("CDR(dst)", $exten->getNumero());
+
 $ligacao->setCallerId($callerid);
 $ligacao->setExten($exten);
 
