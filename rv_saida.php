@@ -26,7 +26,6 @@ $agi->set_variable("CDR(type)", "sainte");
 $ligacao = new Ligacao();
 $ligacao->setAgi($agi);
 
-
 $callerid = new Numero($agi->get_variable("CALLERID(num)")['data']);
 
 $agi->write_console(__FILE__,__LINE__, "CALLERID: ".$callerid->getNumeroCompleto(), $verbose);
@@ -49,6 +48,14 @@ if(!$autenticacao_linha){
 
 $linha = Linhas::complete()->find($autenticacao_linha->linha_id);
 
+
+if($linha->configuracoes->callerid !== $callerid->getNumeroCompleto()){
+	$agi->write_console(__FILE__,__LINE__, "MUNDANDO CALLERID: ". $linha->configuracoes->callerid, $verbose);
+
+	$agi->set_variable("CALLERID(num)", $linha->configuracoes->callerid);
+	$callerid = new Numero($linha->configuracoes->callerid);
+}
+
 $agi->write_console(__FILE__,__LINE__, "Linha ".$linha->id, $verbose);
 
 if(!$linha){
@@ -62,6 +69,8 @@ $exten = new Numero($agi->get_variable("EXTEN")['data']);
 if(empty($exten->getDDD())){
 	$exten->setDDD($linha->ddd_local);
 }
+
+$agi->set_variable("CDR(dst)", $exten->getNumeroComDDD());
 
 $verif_portab = new VerificadorPortabilidade($exten);
 $exten->setOperadora($verif_portab->getOperadora());

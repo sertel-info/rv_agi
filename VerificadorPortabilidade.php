@@ -57,9 +57,9 @@ class VerificadorPortabilidade {
 		    											"FROM prefixos ".
 		      											"LEFT JOIN operadoras ON prefixos.rn1=operadoras.rn1 ".
 		      											"WHERE prefixo = '".$this->ddd.$this->prefixo."'".
-		      											" AND (".$this->mcdu." BETWEEN mcdu_inicial AND mcdu_final)");*/
+		      											" AND (".$this->mcdu." BETWEEN mcdu_inicial AND mcdu_final)");
 
-		return $operadora;
+		return $operadora;*/
 
 		/*$this->write_console(__FILE__, __LINE__, "Número Portado : ".($this->isPortado?'SIM':'NAO'), $this->verbose);
 		$this->write_console(__FILE__, __LINE__, "Operadora do número : ".$this->operadora, $this->verbose);*/
