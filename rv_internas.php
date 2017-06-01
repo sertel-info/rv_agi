@@ -49,10 +49,11 @@ if(!$autenticacao_ligador){
 }
 
 $ligador = Linhas::complete()->find($autenticacao_ligador->linha_id);
+$agi->set_variable("CDR(ramal)", '123');
 
 //$autenticacao_ligador = DadosConfiguracoesLinhas::where('callerid', $callerid->getNumero())->first();
 
-$autenticacao_receptor = DadosAutenticacaoLinhas::where('login_ata', $exten->getNumero())->first();
+$autenticacao_receptor = DadosAutenticacaoLinhas::where('login_ata', $ligacao->getExtenObj()->getNumero())->first();
 
 if(!$autenticacao_receptor){
 	$agi->write_console(__FILE__,__LINE__, "FALHA AO ENCONTRAR O RECEPTOR: ".$ligacao->getExtenObj()->getNumero(), $verbose);
