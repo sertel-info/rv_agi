@@ -5,7 +5,7 @@ class Dial{
 	private $agi;
 	private $tronco;
 	private $tech_prefix = '';
-	private $tempo_chamada = 5;
+	private $tempo_chamada = 60;
 	private $tecnologia;
 	private $opcoes = 'Tt';
 	private $ligacao;

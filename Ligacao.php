@@ -72,6 +72,9 @@ class Ligacao {
 		$this->tipo_rec = $tipo;
 	}
 
+	public function setTipo($tipo){
+		$this->tipo = $tipo;
+	}
 
 	public function getLimiteTempo(){
 		return $this->limite_tempo;

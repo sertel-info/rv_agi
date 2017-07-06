@@ -26,11 +26,14 @@ $exten = new Numero($agi->get_variable("EXTEN")['data']);
 $ligacao->setExten($exten);
 $ligacao->setCallerId($callerid);
 
-$autenticacao_linha = DadosConfiguracoesLinhas::where('callerid', $callerid->getNumeroCompleto())->first();
+$agi->write_console(__FILE__,__LINE__, "Exten: ".$ligacao->getExten(), 1);
+$agi->write_console(__FILE__,__LINE__, "Callerid: ".$ligacao->getCallerId(), 1);
+
+//$autenticacao_linha = DadosConfiguracoesLinhas::where('callerid', $callerid->getNumeroCompleto())->first();
 
 if(!$autenticacao_linha){
 
-	$autenticacao_linha = DadosAutenticacaoLinha::where('login_ata', $callerid->getNumeroCompleto())->first();
+	$autenticacao_linha = DadosAutenticacaoLinhas::where('login_ata', $callerid->getNumeroCompleto())->first();
 
 	if(!$autenticacao_linha){
 		$agi->write_console(__FILE__,__LINE__, "FALHA AO ENCONTRAR EXTENSÃO: ".$callerid->getNumeroCompleto(), $verbose);
@@ -45,8 +48,6 @@ $configuracoes = Configuracoes::first();
 
 $aplicacao = new Aplicacao($agi, $ligacao, $linha, $configuracoes);
 
-//write_console(__FILE__,__LINE__, "Exten: ".$ligacao->getExten(), '');
-//write_console(__FILE__,__LINE__, "Callerid: ".$ligacao->getCallerId(), '');
 
 $aplicacao->exec();
 

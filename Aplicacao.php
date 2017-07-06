@@ -11,6 +11,7 @@ class Aplicacao {
 		//$this->db = $db;
 		$this->ligacao = $ligacao;
 		$this->linha = $linha;
+		$this->agi->write_console(__FILE__, __LINE__, "THIS LINHA ID : ".$linha->id);
 		$this->config = $config;
 	}
 
@@ -18,12 +19,19 @@ class Aplicacao {
 		$app = $this->ligacao->getExten();
 
 		if(substr($app, 0, 1) == "*"){
-			$app = substr($app , 1);
+			$app = substr($app, 1);
+			$app_arg = null;
+
+			if(($arg_pos = strpos($app, "*")) !== FALSE){
+				list($app, $app_arg) = explode("*", $app);
+			}
+
 		}
 
 		$this->agi->write_console(__FILE__, __LINE__, "atalho_sigam_me: ".$this->config->atalho_siga_me);
 		$this->agi->write_console(__FILE__, __LINE__, "atalho_cadeado: ".$this->config->atalho_cadeado);
 		$this->agi->write_console(__FILE__, __LINE__, "app ".$app);
+		$this->agi->write_console(__FILE__, __LINE__, "argumeto app ".$app_arg);
 
 		if($app == $this->config->atalho_siga_me){
 			$this->sigaMe();
@@ -31,6 +39,28 @@ class Aplicacao {
 
 		if($app == $this->config->atalho_cadeado){
 			$this->cadeado();
+		}
+
+		if($app == $this->config->atalho_monitoramento && $app_arg !== null){
+			$linha_alvo = $this->linha->assinante
+									  ->linhas()
+									  ->select('linhas.id', 'dados_autenticacao_linhas.login_ata', 'dados_facilidades_linhas.monitoravel', 'dados_facilidades_linhas.pode_monitorar')
+									  ->leftjoin('dados_autenticacao_linhas', 'dados_autenticacao_linhas.linha_id', '=', 'linhas.id')
+									  ->leftjoin('dados_facilidades_linhas', 'dados_facilidades_linhas.linha_id', '=', 'linhas.id')
+									  ->where('login_ata', $app_arg)
+									  ->first();							  
+								
+			$isDono = ($linha_alvo !== null);
+			$podeMonitorar = ($this->linha->facilidades()->first()->pode_monitorar == 1);
+			$alvoPodeSerMonitorado = $linha_alvo->facilidades->monitoravel == 1;
+			
+			if($isDono && $podeMonitorar && $alvoPodeSerMonitorado){
+				$this->agi->exec("ChanSpy", "SIP/".$linha_alvo->autenticacao->login_ata);
+			} else {
+				$this->agi->write_console(__FILE__, __LINE__, "Pode monitorar ? ".(+$podeMonitorar));
+				$this->agi->write_console(__FILE__, __LINE__, "Alvo pode ser monitorado ? ".(+$alvoPodeSerMonitorado));
+				$this->agi->write_console(__FILE__, __LINE__, "É dono ? ".(+$isDono));
+			}
 		}
 	}
 
