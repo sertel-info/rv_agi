@@ -2,19 +2,21 @@
 <?php
 require_once __DIR__."/vendor/autoload.php";
 
-require_once __DIR__."/Ligacao.php";
-require_once __DIR__."/Dial.php";
-require_once __DIR__."/agi_novo.php";
-require_once __DIR__."/DbHelper.php";
-require_once __DIR__."/Numero.php";
-require_once __DIR__."/BillCalculator.php";
-//require_once __DIR__."/Gravacao.php";
-require_once __DIR__."/VerificadorPortabilidade.php";
+require_once __DIR__."/Classes/Connections.php";
+require_once __DIR__."/Classes/Ligacao.php";
+require_once __DIR__."/Classes/Dial.php";
+require_once __DIR__."/Classes/Agi.php";
+require_once __DIR__."/Classes/DbHelper.php";
+require_once __DIR__."/Classes/Numero.php";
+require_once __DIR__."/Classes/BillCalculator.php";
+require_once __DIR__."/Classes/VerificadorPortabilidade.php";
 
-require_once __DIR__."/Connections.php";
 require_once __DIR__."/Models/Linhas/DadosAutenticacaoLinhas.php";
 require_once __DIR__."/Models/Linhas/DadosConfiguracoesLinhas.php";
 require_once __DIR__."/Models/Linhas/Linhas.php";
+require_once __DIR__."/Models/Portabilidade/Numeros.php";
+require_once __DIR__."/Models/Portabilidade/Operadoras.php";
+require_once __DIR__."/Models/Portabilidade/Prefixos.php";
 
 $verbose = true;
 
@@ -24,7 +26,9 @@ $agi = new AGI();
 $agi->set_variable("CDR(type)", "sainte");
 
 $ligacao = new Ligacao();
+
 $ligacao->setAgi($agi);
+$ligacao->setTipo('sainte');
 
 $callerid = new Numero($agi->get_variable("CALLERID(num)")['data']);
 
@@ -48,7 +52,6 @@ if(!$autenticacao_linha){
 
 $linha = Linhas::complete()->find($autenticacao_linha->linha_id);
 
-
 if($linha->configuracoes->callerid !== $callerid->getNumeroCompleto()){
 	$agi->write_console(__FILE__,__LINE__, "MUNDANDO CALLERID: ". $linha->configuracoes->callerid, $verbose);
 
@@ -63,7 +66,6 @@ if(!$linha){
 	die(1);
 }
 
-
 $exten = new Numero($agi->get_variable("EXTEN")['data']);
 
 if(empty($exten->getDDD())){
@@ -72,13 +74,17 @@ if(empty($exten->getDDD())){
 
 $agi->set_variable("CDR(dst)", $exten->getNumeroComDDD());
 
-$verif_portab = new VerificadorPortabilidade($exten);
+$verif_portab = new VerificadorPortabilidade($exten,
+										     new Numeros,
+											 new Operadoras,
+											 new Prefixos);
+
 $exten->setOperadora($verif_portab->getOperadora());
 $exten->setIsPortado($verif_portab->isPortado());
 
 $ligacao->setCallerId($callerid);
 $ligacao->setExten($exten);
-
+$ligacao->setTipo("sainte");
 $ligacao->setLinha($linha);
 
 $ligacao->verificaCadeado();

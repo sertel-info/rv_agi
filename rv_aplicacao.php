@@ -1,13 +1,12 @@
 #!/usr/bin/php -q
 <?php
 require_once __DIR__."/vendor/autoload.php";
-require_once __DIR__."/Connections.php";
 
-require_once __DIR__."/Aplicacao.php";
-require_once __DIR__."/Numero.php";
-require_once __DIR__."/Ligacao.php";
-require_once __DIR__."/agi_novo.php";
-
+require_once __DIR__."/Classes/Connections.php";
+require_once __DIR__."/Classes/Aplicacao.php";
+require_once __DIR__."/Classes/Numero.php";
+require_once __DIR__."/Classes/Ligacao.php";
+require_once __DIR__."/Classes/Agi.php";
 
 require_once __DIR__."/Models/Linhas/Linhas.php";
 require_once __DIR__."/Models/Linhas/DadosAutenticacaoLinhas.php";

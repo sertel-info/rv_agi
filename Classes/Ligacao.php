@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__."/WriteConsoleTrait.php");
+require_once(__DIR__."/../Traits/WriteConsoleTrait.php");
 
 class Ligacao {
 	use WriteConsoleTrait;
@@ -144,7 +144,7 @@ class Ligacao {
 
 			$this->agi->set_variable('rv_voice_mail_data', json_encode($email_data));
 
-			$this->agi->exec('VoiceMail', $this->getExten()."@"."rv_correio_voz");
+			$this->agi->exec('VoiceMail', $this->getExtenObj()->getNumero()."@"."rv_correio_voz");
 			$status = $this->agi->get_variable('VMSTATUS')['data'];
 
 			$file = '';
@@ -181,7 +181,7 @@ class Ligacao {
 
 
 	public function getTipo(){
-		return $this->exten->getTipo();
+		return $this->tipo;
 	}
 
 
@@ -237,5 +237,10 @@ class Ligacao {
 
 	public function setVerbose($verb){
 		$this->verbose = $verb;
+	}
+
+
+	public function setTipo($tipo){
+		$this->tipo = $tipo;
 	}
 }

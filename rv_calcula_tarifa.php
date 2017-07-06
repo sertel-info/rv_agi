@@ -2,11 +2,11 @@
 <?php
 
 require_once __DIR__."/vendor/autoload.php";
-require_once __DIR__."/Connections.php";
-require_once __DIR__."/agi_novo.php";
-require_once __DIR__."/Numero.php";
-require_once __DIR__."/DbHelper.php";
-require_once __DIR__."/BillCalculator.php";
+require_once __DIR__."/Classes/Connections.php";
+require_once __DIR__."/Classes/Agi.php";
+require_once __DIR__."/Classes/Numero.php";
+require_once __DIR__."/Classes/DbHelper.php";
+require_once __DIR__."/Classes/BillCalculator.php";
 require_once __DIR__."/Models/Linhas/DadosAutenticacaoLinhas.php";
 require_once __DIR__."/Models/Linhas/DadosConfiguracoesLinhas.php";
 

@@ -1,5 +1,5 @@
     <?php
-    require_once(__DIR__."/WriteConsoleTrait.php");
+    require_once(__DIR__."/../Traits/WriteConsoleTrait.php");
     //require_once(__DIR__."/Singleton.php");
 
 

@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__."/WriteConsoleTrait.php");
+require_once(__DIR__."/../Traits/WriteConsoleTrait.php");
 
 class Numero {
 	
@@ -29,6 +29,7 @@ class Numero {
 
 	public function __construct($numero){
 		$this->numero_completo = $numero;
+
 		$this->setParts();
 	}
 
@@ -107,6 +108,9 @@ class Numero {
 			$numero = $codArea.$mts[5];
 			$tipo = 'fixo';
 							
+		} else {
+			$this->write_console(__FILE__, __LINE__, 'NUMERO EM FORMATO DESCNOHECIDO: '.$this->numero_completo, $this->verbose);
+			return;			
 		}
 		
 		$this->tipo = $tipo;

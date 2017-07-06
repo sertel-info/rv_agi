@@ -1,9 +1,5 @@
 <?php
 
-require_once __DIR__."/Models/Portabilidade/Numeros.php";
-require_once __DIR__."/Models/Portabilidade/Operadoras.php";
-require_once __DIR__."/Models/Portabilidade/Prefixos.php";
-
 class VerificadorPortabilidade {
 
 	private $num;
@@ -15,7 +11,11 @@ class VerificadorPortabilidade {
 		}
 	}
 
-	public function setNumero(Numero $numero){
+	public function setNumero(Numero $numero,
+							  Numeros $numeros_class,
+							  Operadoras $operadora_class,
+							  Prefixos $prefix){
+
 		$this->num = $numero;
 	}
 

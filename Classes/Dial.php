@@ -13,7 +13,6 @@ class Dial{
 	private $last_status;
 	private $tentativas;
 	private $verbose = true;
-	private $direcao; //sainte, entrante ou interna;
 	private $modo_prefixo = "ddd"; 
 	//quais os prefixos de saida (ddd, operadora, cod_pais) Ex.: 55+operadora+ddd
 
@@ -21,7 +20,12 @@ class Dial{
 		$this->ligacao = $ligacao;
 		$this->agi = $ligacao->getAgi();
 
-		$this->tecnologia = $ligacao->getLinha()->tecnologia;
+		$linha = $ligacao->getLinha();
+
+		if($linha !== null){
+			$this->tecnologia = $linha->tecnologia;
+		}
+		
 		$this->agi->write_console(__FILE__,__LINE__, "TECNOLOGIA DA LIGAÇÃO:".$this->tecnologia );
 	}
 
@@ -54,23 +58,29 @@ class Dial{
 	public function getDialString(){
 		$this->agi->write_console(__FILE__,__LINE__, "GET DIAL ", $this->verbose);
 		
-		$tecnologia = strtolower($this->tecnologia);
+		if(!isset($this->tecnologia)){
+			$tecnologia = 'sip';
+		} else {
+			$tecnologia = strtolower($this->tecnologia);
+		}
+		
+		$this->agi->write_console(__FILE__,__LINE__, "TECNOLOGIA ".$tecnologia, $this->verbose);
 
 		$numero_formatado = $this->gerarPrefixos().$this->ligacao->getExtenObj()->getNumero();
+		$this->agi->write_console(__FILE__,__LINE__, "NUMERO FORMATADO ".$this->ligacao->getExten(), $this->verbose);
 
 		if($tecnologia == 'sip'){
 
 			$tronco = $this->tronco ? "@".$this->tronco['nome'] : "";
 
-			$dial = $this->tecnologia."/".
-								$this->tech_prefix.
-								$numero_formatado.
-								$tronco.','.
-								$this->tempo_chamada.
-								($this->opcoes != "" ? ",".$this->opcoes : $this->opcoes);
+			$dial = "sip/".
+						$this->tech_prefix.
+						$numero_formatado.
+						$tronco.','.
+						$this->tempo_chamada.
+						($this->opcoes != "" ? ",".$this->opcoes : $this->opcoes);
 		
-		} else if($tecnologia == 'iax' ||
-				  $tecnologia == 'iax2'){
+		} else if($tecnologia == 'iax' || $tecnologia == 'iax2') {
 
 			$tronco = $this->tronco ? $this->tronco['nome']."/" : "";
 
@@ -111,15 +121,20 @@ class Dial{
 
 	public function exec(){
 		$this->verificaTempoMax();
+		$tipo_ligacao = $this->ligacao->getTipo();
 
-		$this->agi->write_console(__FILE__,__LINE__, "TIPO LIGAÇÃO: ".$this->ligacao->getTipo());
-		if(in_array($this->ligacao->getTipo(), ['fixo', 'movel', 'nextel', 'servico'])){
-			$this->direcao = 'sainte';
+		$this->agi->write_console(__LINE__, __FILE__, 'Tipos: '.$tipo_ligacao.'/'.$this->ligacao->getExtenObj()->getTipo());
+
+		if($tipo_ligacao == 'sainte' 
+			&& in_array($this->ligacao->getExtenObj()->getTipo(), ['fixo', 'movel', 'nextel', 'servico'])){
 			$this->execSainte();			
+		
+		} else if($tipo_ligacao == 'entrante'){
+			$this->execEntrante();
+		
 		} else {
-			$this->direcao = 'entre_ramais';
 			$this->execEntreRamais();
-		}
+		} 
 	}
 	
 
@@ -145,10 +160,14 @@ class Dial{
 		return $rotas;
 	}
 
-	public function setTempoChamada(){
-		$this->tempo_chamada = isset($this->tronco['tempo_chamada']) ?
+	public function setTempoChamada($tempo = null){
+		if($tempo == null){
+			$this->tempo_chamada = isset($this->tronco['tempo_chamada']) ?
 										 $this->tronco['tempo_chamada'] : 
 										 $this->tempo_chamada;
+		} else {
+			$this->tempo_chamada = $tempo;
+		}
 	}
 
 	public function setTechPrefix(){
@@ -214,8 +233,9 @@ class Dial{
 	}
 
 	public function execEntreRamais(){
+		$this->agi->write_console(__FILE__,__LINE__, "Executando chamada entre ramais", $this->verbose);
+	
 		$this->tronco = null;
-		$this->agi->write_console(__FILE__,__LINE__, "entre ramais", $this->verbose);
 
 		$this->dial($this->getDialString());
 	}
@@ -272,6 +292,13 @@ class Dial{
 		}
 	}
 
+	public function execEntrante(){
+		$this->agi->write_console(__FILE__,__LINE__, "Executanto chamada entrante ", $this->verbose);
+		$this->tronco = null;
+
+		$this->dial($this->getDialString());
+	}
+
 	public function getLastStatus(){
 		return $this->last_status;
 	}
@@ -279,41 +306,17 @@ class Dial{
 	public function setVerbose($verb){
 		$this->verbose = $verb;
 	}
-}
 
-
-/**
-
-public function getTroncosDoArquivo(){
-		$this->agi->write_console(__FILE__, __LINE__, "GETTING TRONCOS ", $this->verbose);
-		$tipo = $this->ligacao->getTipo();
-		$linha = $this->ligacao->getLinha();
-
-		$troncos = parse_ini_file($this->arquivos_troncos, true);
-
-		if(!$troncos){
-			$this->agi->write_console(__FILE__, __LINE__, "FALHA AO LER ARQUIVO DE CONFIGURAÇÃO DE TRONCOS ", $this->verbose);
-			return [];
-		}
-
-		if(!strlen($tipo)){
-			$this->agi->write_console(__FILE__, __LINE__, "LIGACAO SEM TIPO SETADO ", $this->verbose);
-			return [];
-		}
-
-		$this->agi->write_console(__FILE__, __LINE__, "ROTA COM CLI: ".$linha->cli , $this->verbose);
-
-		$troncos = array_filter($troncos, function($el) use ($tipo, $linha) {	
-			$tronco_cli = isset($el['cli']) && $el['cli'] == 'sim' ? 1 : 0;
-			$tipos_tronco = explode(',', $el['tipo']);
-
-			return (in_array($tipo, $tipos_tronco) || !isset($el['tipo']) || !strlen($el['tipo']))
-					 && ($tronco_cli == $linha->cli);
-		});
-		
-		$this->agi->write_console(__FILE__, __LINE__, "QTD TRONCOS: ".count($troncos), $this->verbose);
-
-		return $troncos;
+	public function getLigacao(){
+		return $this->ligacao;
 	}
 
-*/
+	public function setLigacao($ligacao){
+		$this->ligacao = $ligacao;
+	}
+
+	public function execRaw($expression){
+		$this->agi->exec('DIAL', $expression);
+	}
+}
+

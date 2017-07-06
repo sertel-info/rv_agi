@@ -1,8 +1,9 @@
 #!/usr/bin/php -q
 <?php
-require_once __DIR__."/agi_novo.php";
-require_once __DIR__."/MailService.php";
-require_once __DIR__."/DbHelper.php";
+require_once __DIR__."/Classes/Agi.php";
+require_once __DIR__."/Classes/MailService.php";
+require_once __DIR__."/Classes/DbHelper.php";
+require_once __DIR__.'/vendor/autoload.php';
 
 date_default_timezone_set('America/Sao_Paulo');
 
@@ -41,7 +42,9 @@ foreach($campos as $nome=>$campo){
 	$agi->write_console(__FILE__,__LINE__, "Campo: ".$nome. " Valor: ".$campo);
 }**/
 
-$mail_service = new MailService(MAIL_SERVICE_ADDRESS);
+
+$mail_service = new MailService(MAIL_SERVICE_ADDRESS, new Unirest\Request\Body, new Unirest\Request);
+
 $mail_service->setData($campos);
 
 if(isset($dados['exten']) && $dados['exten'] !== ''){
@@ -87,7 +90,6 @@ if(isset($dados['exten']) && $dados['exten'] !== ''){
 			if(!mkdir($exten_folder)){
 				$agi->write_console(__FILE__,__LINE__, "FALHA AO CRIAR PASTA DO EXTEN: " . $exten_folder);        	
         	}
-
         }
 
         $nome_wav = basename($gravacao);

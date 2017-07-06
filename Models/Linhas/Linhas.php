@@ -8,6 +8,8 @@ require_once __DIR__."/DadosConfiguracoesLinhas.php";
 require_once __DIR__."/DadosFacilidadesLinhas.php";
 require_once __DIR__."/DadosPermissoesLinhas.php";
 require_once __DIR__."/Dids.php";
+require_once __DIR__."/../Uras/Uras.php";
+require_once __DIR__."/../GruposAtendimento/GruposAtendimento.php";
 
 class Linhas extends Model
 {
@@ -29,8 +31,7 @@ class Linhas extends Model
 	}
 
 	public function setCodecsAttribute($value){
-		$this->attributes['codecs'] = in_array(gettype($value), ['array', 'object']) ?
-																	 json_encode($value) : "[]";
+		$this->attributes['codecs'] = in_array(gettype($value), ['array', 'object']) ? json_encode($value) : "[]";
 	}
 
 	public function setCliAttribute($value){
@@ -60,9 +61,26 @@ class Linhas extends Model
  	public function did(){
  		return $this->hasOne(Dids::class, 'linha_id', 'id');
  	}  	
+	
+	/*public function saudacoes(){
+ 		return $this->hasMany(Saudacoes::class, 'linha_id', 'id');
+ 	}*/  	
 
  	public function scopeComplete($query)
     {
-        return $query->with('permissoes', 'autenticacao', 'assinante', 'configuracoes', 'facilidades', 'did');
+        return $query->with('permissoes',
+        					'autenticacao', 
+        					'assinante', 
+        					'configuracoes', 
+        					'facilidades', 
+        					'did', 
+        					['ura'=>function($query){
+        						$query->with("audio");
+        					}]);
+    }
+
+    public function grupos()
+    {
+        return $this->belongsToMany(GruposAtendimento::class, 'grupos_linhas', 'linha_id', 'grupo_id');
     }
 }

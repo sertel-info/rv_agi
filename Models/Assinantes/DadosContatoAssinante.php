@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Eloquent\Model;
+
 require_once __DIR__."/Assinantes.php";
 
 class DadosContatoAssinante extends Model

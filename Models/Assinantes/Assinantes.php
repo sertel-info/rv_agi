@@ -7,6 +7,7 @@ require_once __DIR__."/DadosContatoAssinante.php";
 require_once __DIR__."/DadosFinanceiroAssinante.php";
 require_once __DIR__."/DadosFacilidadesAssinante.php";
 require_once __DIR__."/../Planos/Planos.php";
+require_once __DIR__."/../Saudacoes/Saudacoes.php";
 
 class Assinantes extends Model
 {
@@ -47,6 +48,9 @@ class Assinantes extends Model
         return $this->hasOne(DadosFacilidadesAssinante::class, 'assinante_id', 'id');
     }
 
+    public function saudacoes(){
+        return $this->hasMany(Saudacoes::class, 'assinante_id', 'id');
+    }
 
     /*
     * Mutators
