@@ -5,11 +5,11 @@ class Dial{
 	private $agi;
 	private $tronco;
 	private $tech_prefix = '';
-	private $tempo_chamada = 5;
+	private $tempo_chamada = 30;
 	private $tecnologia;
 	private $opcoes = 'Tt';
 	private $ligacao;
-	private $arquivos_troncos = "rv_troncos.ini";
+	private $arquivos_troncos = __DIR__."/../rv_troncos.ini";
 	private $last_status;
 	private $tentativas;
 	private $verbose = true;
@@ -123,10 +123,11 @@ class Dial{
 		$this->verificaTempoMax();
 		$tipo_ligacao = $this->ligacao->getTipo();
 
-		$this->agi->write_console(__LINE__, __FILE__, 'Tipos: '.$tipo_ligacao.'/'.$this->ligacao->getExtenObj()->getTipo());
+		$this->agi->write_console(__FILE__, __LINE__, 'Tipos: '.$tipo_ligacao.'/'.$this->ligacao->getExtenObj()->getTipo());
 
 		if($tipo_ligacao == 'sainte' 
 			&& in_array($this->ligacao->getExtenObj()->getTipo(), ['fixo', 'movel', 'nextel', 'servico'])){
+
 			$this->execSainte();			
 		
 		} else if($tipo_ligacao == 'entrante'){
@@ -140,10 +141,16 @@ class Dial{
 
 	public function getRotas(){
 		$rotas_linha = json_decode($this->ligacao->getLinha()->configuracoes->rotas_saida);
-		$this->agi->write_console(__LINE__, __FILE__, var_export($rotas_linha) ,true);
+
+		$this->agi->write_console(__LINE__, __FILE__, "Rotas: ".var_export($rotas_linha, true) ,true);
 
 		$troncos_arquivo = parse_ini_file($this->arquivos_troncos, true);
 		
+		if($troncos_arquivo == null || $troncos_arquivo == false){
+		$this->agi->write_console(__LINE__, __FILE__, "FALHA AO LER O ARQUIVO DE TRONCOS NO CAMINHO: ".$this->arquivos_troncos,true);
+		}
+		
+
 		$rotas = array();
 		/*$this->agi->write_console(__LINE__, __FILE__, var_export( array_intersect_key($troncos_arquivo, array_flip($troncos_linha)),true))*/;
 
@@ -219,7 +226,7 @@ class Dial{
 
 
 	public function execSainte(){
-		$tipo = $this->ligacao->getTipo();
+		$tipo = $this->ligacao->getExtenObj()->getTipo();
 
 		if($tipo == 'movel'){
 			$this->agi->write_console(__FILE__,__LINE__, "exec movel", $this->verbose);
@@ -241,12 +248,14 @@ class Dial{
 	}
 
 	public function execFixo(){
+
 		$linha = $this->ligacao->getLinha();
 
 		$rotas = $this->getRotas();
+		$this->agi->write_console(__LINE__, __FILE__, "R ".var_export($rotas, true) ,true);
 
 		$tentativas = 0;
-	
+		
 		if(!count($rotas)){
 			$this->agi->write_console(__FILE__,__LINE__, "Nenhum tronco apropriado encontrado", $this->verbose);
 			die(1);
@@ -254,9 +263,13 @@ class Dial{
 
 		foreach($rotas as $nome_rota=>$rota){
 
-			if($nome_rota == 'EBS' && $this->ligacao->getTipo() == 'movel'){
+			if($nome_rota == 'EBS' && $this->ligacao->getExtenObj()->getTipo() == "movel"){
 				$this->agi->write_console(__FILE__,__LINE__, "exec ebs", $this->verbose);
 				$this->dial($this->getDialGsm());
+				continue;
+			}
+
+			if(strpos($rota['tipo'], $this->ligacao->getExtenObj()->getTipo()) == -1){
 				continue;
 			}
 
