@@ -89,6 +89,8 @@ if($ligacao->verificaGravacao()){
 
 $grupo_atend_model = $linha->grupos()->orderBy('posicao' , 'asc')->first();
 
+$dial = new Dial($ligacao);
+
 if($grupo_atend_model){
 
 	$grupo = new GruposManager($grupo_atend_model, $dial);
