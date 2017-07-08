@@ -11,6 +11,7 @@ require_once __DIR__."/Classes/GruposManager.php";
 require_once __DIR__."/Classes/Numero.php";
 require_once __DIR__."/Classes/UraManager.php";
 require_once __DIR__."/Classes/Saudacao.php";
+require_once __DIR__."/Classes/AtendAutomaticoManager.php";
 
 require_once __DIR__."/Models/Linhas/Dids.php";
 //require_once __DIR__."/Models/Saudacoes/Saudacoes.php";

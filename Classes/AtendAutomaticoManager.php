@@ -30,7 +30,9 @@ class AtendAutomaticoManager {
 
 	public function execUra(){
 		$ura = Uras::whereRaw("MD5(id) = '".$this->linha->facilidades->atend_automatico_destino."'")->first();
-			
+		
+		$this->agi->write_console(__FILE__,__LINE__, "Executando ura ");
+
 		if(!$ura){
 			$this->agi->write_console(__FILE__,__LINE__, "Não foi possível encontrar a ura.".$this->linha->facilidades->atend_automatico_destino);
 			exit;
@@ -42,6 +44,8 @@ class AtendAutomaticoManager {
 
 	public function execGrupo(){
 		$grupo = GruposAtendimento::whereRaw("MD5(id) = '".$this->linha->facilidades->atend_automatico_destino."'")->first();
+
+		$this->agi->write_console(__FILE__,__LINE__, "Executando grupo ");
 
 		if(!$grupo){
 			$this->agi->write_console(__FILE__,__LINE__, "Não foi possível encontrar o grupo.".$this->linha->facilidades->atend_automatico_destino);
@@ -56,6 +60,8 @@ class AtendAutomaticoManager {
 		$fila = Filas::whereRaw("MD5(id) = '".$this->linha->facilidades->atend_automatico_destino."'")
 						->first();
 		
+		$this->agi->write_console(__FILE__,__LINE__, "Executando fila ");
+
 		$this->agi->write_console(__FILE__,__LINE__, "Não foi possível encontrar a fila.".$fila->nome);
 
 		if(!$fila){
