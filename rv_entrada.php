@@ -14,12 +14,10 @@ require_once __DIR__."/Classes/Saudacao.php";
 require_once __DIR__."/Classes/AtendAutomaticoManager.php";
 
 require_once __DIR__."/Models/Linhas/Dids.php";
-//require_once __DIR__."/Models/Saudacoes/Saudacoes.php";
 
 date_default_timezone_set('America/Sao_Paulo');
 $verbose = true;
 
-//$db = new DbHelper(new mysqli("127.0.0.1", "ipbxsertel", "@ipbxsertel", "ramal_virtual"));
 $agi = new AGI();
 
 $agi->set_variable("CDR(type)", "entrante");
@@ -30,11 +28,10 @@ $ligacao->setAgi($agi);
 $callerid = new Numero($agi->get_variable("CALLERID(num)")['data']);
 $exten = new Numero($agi->get_variable("EXTEN")['data']);
 
+$agi->set_variable("CDR(dst_type)", $exten->getTipo());
+
 $ligacao->setCallerId($callerid);
 $ligacao->setExten($exten);
-
-//$line = $db->getLine($ligacao->getExten());
-//$ligacao->setLine($line);
 
 $did_linha = Dids::where('extensao_did', $exten->getNumeroCompleto())->first();
 
@@ -44,6 +41,7 @@ if(!$did_linha){
 } 
 
 $linha = Linhas::complete()->find($did_linha);
+$agi->set_variable("CDR(dst_account)", $linha->autenticacao->login_ata);
 
 /** SAUDAÇÕES **/
 

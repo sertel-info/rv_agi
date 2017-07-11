@@ -51,6 +51,8 @@ if(!$autenticacao_linha){
 } 
 
 $linha = Linhas::complete()->find($autenticacao_linha->linha_id);
+$agi->set_variable("CDR(src_account)", $linha->autenticacao->login_ata);
+
 
 if($linha->configuracoes->callerid !== $callerid->getNumeroCompleto()){
 	$agi->write_console(__FILE__,__LINE__, "MUNDANDO CALLERID: ". $linha->configuracoes->callerid, $verbose);
@@ -67,6 +69,7 @@ if(!$linha){
 }
 
 $exten = new Numero($agi->get_variable("EXTEN")['data']);
+$agi->set_variable("CDR(dst_type)", $exten->getTipo());
 
 if(empty($exten->getDDD())){
 	$exten->setDDD($linha->ddd_local);

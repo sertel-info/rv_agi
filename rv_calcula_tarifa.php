@@ -15,8 +15,6 @@ $db = new DbHelper(new mysqli("127.0.0.1", "ipbxsertel", "@ipbxsertel", "ramal_v
 $agi = new AGI();
 $duracao = $agi->get_variable('CDR(billsec)')['data'];
 
-//$duracao = 130;
-
 $agi->write_console(__FILE__,__LINE__, "Billsec: ".$duracao);
 
 $exten = new Numero( $agi->get_variable('CDR(dst)')['data'] );

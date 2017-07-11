@@ -74,7 +74,7 @@ class Numero {
 				$numero = $mts[4].$mts[5];
 			}
 
-			$tipo = 'nextel';	
+			$tipo = 'movel';	
 		/*in_array($mts[4],$nonoDigito) && */			
 		} elseif(!in_array(substr($mts[5],0,2),$nextel) && preg_match("/^[6-9]/", $mts[6],$m)){
 								

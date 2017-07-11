@@ -30,7 +30,8 @@ $ligacao->setAgi($agi);
 $callerid = new Numero($agi->get_variable("CALLERID(num)")['data']);
 $exten = new Numero($agi->get_variable("EXTEN")['data']);
 
-$agi->set_variable("CDR(dst)", $exten->getNumero());
+$agi->set_variable("CDR(dst_type)", $exten->getTipo());
+//$agi->set_variable("CDR(dst)", $exten->getNumero());
 
 $ligacao->setCallerId($callerid);
 $ligacao->setExten($exten);
@@ -53,6 +54,7 @@ if(!$autenticacao_ligador){
 }
 
 $ligador = Linhas::complete()->find($autenticacao_ligador->linha_id);
+$agi->set_variable("CDR(src_id)", $ligador->id);
 
 $autenticacao_receptor = DadosAutenticacaoLinhas::where('login_ata', $ligacao->getExtenObj()->getNumero())->first();
 
@@ -62,6 +64,7 @@ if(!$autenticacao_receptor){
 } 
 
 $receptor = Linhas::complete()->find($autenticacao_receptor->linha_id);
+$agi->set_variable("CDR(dst_id)", $receptor->id);
 
 /** SAUDAÇÕES **/
 

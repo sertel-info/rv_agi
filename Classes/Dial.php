@@ -126,7 +126,7 @@ class Dial{
 		$this->agi->write_console(__FILE__, __LINE__, 'Tipos: '.$tipo_ligacao.'/'.$this->ligacao->getExtenObj()->getTipo());
 
 		if($tipo_ligacao == 'sainte' 
-			&& in_array($this->ligacao->getExtenObj()->getTipo(), ['fixo', 'movel', 'nextel', 'servico'])){
+			&& in_array($this->ligacao->getExtenObj()->getTipo(), ['fixo', 'movel', 'servico'])){
 
 			$this->execSainte();			
 		

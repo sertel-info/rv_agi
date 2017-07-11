@@ -22,6 +22,8 @@ $ligacao->setAgi($agi);
 $callerid = new Numero($agi->get_variable("CALLERID(num)")['data']);
 $exten = new Numero($agi->get_variable("EXTEN")['data']);
 
+$agi->set_variable("CDR(dst_type)", "aplicacao");
+
 $ligacao->setExten($exten);
 $ligacao->setCallerId($callerid);
 
@@ -39,6 +41,7 @@ if(!$autenticacao_linha){
 }
 
 $linha = $autenticacao_linha->linha()->complete()->first();
+$agi->set_variable("CDR(src_account)", $linha->autenticacao->login_ata);
 
 $configuracoes = Configuracoes::first();
 
