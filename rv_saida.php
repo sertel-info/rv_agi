@@ -6,7 +6,6 @@ require_once __DIR__."/Classes/Connections.php";
 require_once __DIR__."/Classes/Ligacao.php";
 require_once __DIR__."/Classes/Dial.php";
 require_once __DIR__."/Classes/Agi.php";
-require_once __DIR__."/Classes/DbHelper.php";
 require_once __DIR__."/Classes/Numero.php";
 require_once __DIR__."/Classes/BillCalculator.php";
 require_once __DIR__."/Classes/VerificadorPortabilidade.php";
