@@ -10,6 +10,7 @@ require_once __DIR__."/Classes/Numero.php";
 require_once __DIR__."/Classes/BillCalculator.php";
 require_once __DIR__."/Classes/VerificadorPortabilidade.php";
 require_once __DIR__."/Classes/VerificadorPermissoes.php";
+require_once __DIR__."/Classes/Log/Logger.php";
 
 require_once __DIR__."/Models/Linhas/DadosAutenticacaoLinhas.php";
 require_once __DIR__."/Models/Linhas/DadosConfiguracoesLinhas.php";
@@ -22,18 +23,17 @@ $verbose = true;
 
 date_default_timezone_set('America/Sao_Paulo');
 
-$agi = new AGI();
+$agi = AGI::getSingleton();
 $agi->set_variable("CDR(type)", "sainte");
 
 $ligacao = new Ligacao();
 
-$ligacao->setAgi($agi);
 $ligacao->setTipo('sainte');
 
 $callerid = new Numero($agi->get_variable("CALLERID(num)")['data']);
 $exten = new Numero($agi->get_variable("EXTEN")['data']);
 
-$agi->write_console(__FILE__,__LINE__, "CALLERID: ".$callerid->getNumeroCompleto(), $verbose);
+Logger::write(__FILE__,__LINE__, "CALLERID: ".$callerid->getNumeroCompleto(), $verbose);
 
 $autenticacao_linha = DadosConfiguracoesLinhas::where('callerid', $callerid->getNumeroCompleto())->first();
 
@@ -41,12 +41,12 @@ if(!$autenticacao_linha){
 	$autenticacao_linha = DadosAutenticacaoLinhas::where('login_ata', $callerid->getNumeroCompleto())->first();
 
 	if(!$autenticacao_linha){
-		$agi->write_console(__FILE__,__LINE__, "fala 2 ", $verbose);
+		Logger::write(__FILE__,__LINE__, "fala 2 ", $verbose);
 		$autenticacao_linha = Dids::where('extensao_did', $callerid->getNumero())->first();
 	}
 
 	if(!$autenticacao_linha){
-		$agi->write_console(__FILE__,__LINE__, "FALHA AO ENCONTRAR EXTENSÃO: ".$callerid->getNumeroCompleto(), $verbose);
+		Logger::write(__FILE__,__LINE__, "FALHA AO ENCONTRAR EXTENSÃO: ".$callerid->getNumeroCompleto(), $verbose);
 		die(1);
 	}	
 } 
@@ -61,7 +61,7 @@ $linha = Linhas::complete()->find($autenticacao_linha->linha_id);
 	
 	if(!$hasPermissao){
 		foreach ($verif_permissoes->getErros() as $erro){
-			$agi->write_console(__FILE__,__LINE__, $erro, $verbose);
+			Logger::write(__FILE__,__LINE__, $erro, $verbose);
 		}
 		exit;
 	}
@@ -72,16 +72,16 @@ $agi->set_variable("CDR(src_account)", $linha->autenticacao->login_ata);
 
 
 if($linha->configuracoes->callerid !== $callerid->getNumeroCompleto()){
-	$agi->write_console(__FILE__,__LINE__, "MUNDANDO CALLERID: ". $linha->configuracoes->callerid, $verbose);
+	Logger::write(__FILE__,__LINE__, "MUNDANDO CALLERID: ". $linha->configuracoes->callerid, $verbose);
 
 	$agi->set_variable("CALLERID(num)", $linha->configuracoes->callerid);
 	$callerid = new Numero($linha->configuracoes->callerid);
 }
 
-$agi->write_console(__FILE__,__LINE__, "Linha ".$linha->id, $verbose);
+Logger::write(__FILE__,__LINE__, "Linha ".$linha->id, $verbose);
 
 if(!$linha){
-	$agi->write_console(__FILE__,__LINE__, "FALHA AO ENCONTRAR LINHA NO BANCO", $verbose);
+	Logger::write(__FILE__,__LINE__, "FALHA AO ENCONTRAR LINHA NO BANCO", $verbose);
 	die(1);
 }
 
@@ -114,9 +114,9 @@ $ligacao->setTarifa($linha->assinante->planos()->first()->__get('valor_'  .
 
 $ligacao->setLimiteTempo(BillCalculator::calcTempoMaxLigacao($ligacao));
 
-$agi->write_console(__FILE__,__LINE__, "Tarifa da ligação: ".$ligacao->getTarifa(),1);
-$agi->write_console(__FILE__,__LINE__, "Créditos do assinante: ".$linha->assinante->financeiro->creditos,1);
-$agi->write_console(__FILE__,__LINE__, "Tempo máximo da ligação: ".$ligacao->getLimiteTempo(),1);
+Logger::write(__FILE__,__LINE__, "Tarifa da ligação: ".$ligacao->getTarifa(),1);
+Logger::write(__FILE__,__LINE__, "Créditos do assinante: ".$linha->assinante->financeiro->creditos,1);
+Logger::write(__FILE__,__LINE__, "Tempo máximo da ligação: ".$ligacao->getLimiteTempo(),1);
 
 if($ligacao->verificaGravacao()){
 	//$ligacao->setLinha($ligador);
