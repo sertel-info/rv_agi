@@ -3,6 +3,8 @@
 require_once __DIR__."/Numero.php";
 require_once __DIR__."/Dial.php";
 require_once __DIR__."/Ligacao.php";
+require_once __DIR__."/Log/Logger.php";
+require_once __DIR__."/Agi.php";
 
 class GruposManager {
 
@@ -11,7 +13,7 @@ class GruposManager {
 	private $agi;
 	private $grupo;
 
-	function __construct($grupoModel, $agi){
+	function __construct($grupoModel){
 		$this->grupo = $grupoModel;
 		
 		$this->linhas = $grupoModel->linhas()
@@ -20,25 +22,25 @@ class GruposManager {
 				                      ->orderBy('pivot_posicao')
 				                      ->get();
 
-		$this->agi = $agi;
-		$this->agi->write_console(__FILE__,__LINE__, "Iniciando Grupos Manager");
+		$this->agi = AGI::getSingleton();
+		
+		Logger::write(__FILE__,__LINE__, "Iniciando Grupos Manager");
 	}
 
 	public function exec(){
 		$ligacao = new Ligacao();
-		$ligacao->setAgi($this->agi);
 		$ligacao->setLimiteTempo($this->grupo->tempo_chamada);
 
 		$dial = new Dial($ligacao);
 
 		if($this->grupo->tipo == 'hierarquico'){
-			$this->agi->write_console(__FILE__,__LINE__, "Grupo Hierárquico");
+			Logger::write(__FILE__,__LINE__, "Grupo Hierárquico");
 			$this->hierarquico($dial);
 		} else if($this->grupo->tipo == 'distribuidor') {
-			$this->agi->write_console(__FILE__,__LINE__, "Grupo Distribuidor");			
+			Logger::write(__FILE__,__LINE__, "Grupo Distribuidor");			
 			$this->distribuidor($dial);
 		} else if( $this->grupo->tipo == 'multiplo'){
-			$this->agi->write_console(__FILE__,__LINE__, "Grupo Múltiplos");
+			Logger::write(__FILE__,__LINE__, "Grupo Múltiplos");
 			$this->multiplo($dial);
 		}
 	}
@@ -48,11 +50,11 @@ class GruposManager {
 		$linhas = $this->linhas;
 
 		$rotacao = $linhas->pluck('autenticacao.login_ata')->toArray();
-		$this->agi->write_console(__FILE__,__LINE__, "ROTACAO INICIAL ".json_encode($rotacao));
+		Logger::write(__FILE__,__LINE__, "ROTACAO INICIAL ".json_encode($rotacao));
 
 		$rotacao_parcial = [current($rotacao), next($rotacao)];
 		
-		$this->agi->write_console(__FILE__,__LINE__, "ROTACAO PARCIAL INICIAL ".json_encode($rotacao_parcial));
+		Logger::write(__FILE__,__LINE__, "ROTACAO PARCIAL INICIAL ".json_encode($rotacao_parcial));
 
 		$ligacao = $dial->getLigacao();
 		$ligacao->setLimiteTempo($this->grupo->tempo_chamada);
@@ -64,7 +66,7 @@ class GruposManager {
 
 				$numero = new Numero($ramal); 
 				$ligacao->setExten( $numero );
-				$this->agi->write_console(__FILE__,__LINE__, "RAMAL ".$ramal);
+				Logger::write(__FILE__,__LINE__, "RAMAL ".$ramal);
 
 				$dial->setLigacao($ligacao);
 				$dial->exec();
@@ -72,10 +74,10 @@ class GruposManager {
 			}
 
 			$novo_ramal_rotacao = next($rotacao);
-			$this->agi->write_console(__FILE__,__LINE__, "NEXT ".$novo_ramal_rotacao);
+			Logger::write(__FILE__,__LINE__, "NEXT ".$novo_ramal_rotacao);
 			array_push($rotacao_parcial, $novo_ramal_rotacao);
 		
-			$this->agi->write_console(__FILE__,__LINE__, "NOVA ROTACAO PARCIAL ".json_encode($rotacao_parcial));
+			Logger::write(__FILE__,__LINE__, "NOVA ROTACAO PARCIAL ".json_encode($rotacao_parcial));
 
 		} while($novo_ramal_rotacao !== false
 				&& in_array($dial->getLastStatus(), ["CHANUNAVAIL",
@@ -107,13 +109,13 @@ class GruposManager {
 		$rotacao = $this->agi->get_variable('DB(rv_distribuidores/'.$id_assinante.')')['data'];
 		$rotacao_obj = json_decode($rotacao, true);
 
-		$this->agi->write_console(__FILE__,__LINE__, "RAMAIS DO GRUPO: ".json_encode($ramais_grupo));
+		Logger::write(__FILE__,__LINE__, "RAMAIS DO GRUPO: ".json_encode($ramais_grupo));
 
 		if(empty($rotacao_obj) || count($rotacao_obj) !== count($ramais_grupo) ){
 			$rotacao_obj = $ramais_grupo;
 		}
 		
-		$this->agi->write_console(__FILE__,__LINE__, "ROTACAO: ".$rotacao);
+		Logger::write(__FILE__,__LINE__, "ROTACAO: ".$rotacao);
 
 		$ligacao = $dial->getLigacao();
 		$ligacao->setLimiteTempo($this->grupo->tempo_chamada);
@@ -125,7 +127,7 @@ class GruposManager {
 			$dial->setLigacao($ligacao);
 			$dial->exec();
 			
-			$this->agi->write_console(__FILE__,__LINE__, "STATUS : ".$dial->getLastStatus());
+			Logger::write(__FILE__,__LINE__, "STATUS : ".$dial->getLastStatus());
 			
 			if($dial->getLastStatus() == "ANSWER") {
 				$ramal_atendedor = $ramal;
@@ -139,7 +141,7 @@ class GruposManager {
 			}
 		}
 
-		//$this->agi->write_console(__FILE__,__LINE__, "ROTACAO ".$rotacao);
+		//Logger::write(__FILE__,__LINE__, "ROTACAO ".$rotacao);
 		$this->agi->set_variable('DB(rv_distribuidores/'.$id_assinante.')', json_encode($rotacao_obj));
 	}
 }

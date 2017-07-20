@@ -5,6 +5,8 @@ require_once __DIR__."/../Models/Uras/Uras.php";
 require_once __DIR__."/../Models/GruposAtendimento/GruposAtendimento.php";
 require_once __DIR__."/../Models/Filas/Filas.php";
 require_once __DIR__."/GruposManager.php";
+require_once __DIR__."/Log/Logger.php";
+require_once __DIR__."/FilasManager.php";
 
 class AtendAutomaticoManager {
 
@@ -13,11 +15,12 @@ class AtendAutomaticoManager {
 
 	function __construct($linha, $agi){
 		$this->linha = $linha;
-		$this->agi = $agi;
+		$this->agi = AGI::getSingleton();
 	}
 
 	public function exec(){
-		
+		$this->agi->exec('Answer');
+
 		if($this->linha->facilidades->atend_automatico_tipo == "ura"){
 			$this->execUra();
 		} else if($this->linha->facilidades->atend_automatico_tipo == "grupo"){
@@ -31,10 +34,10 @@ class AtendAutomaticoManager {
 	public function execUra(){
 		$ura = Uras::whereRaw("MD5(id) = '".$this->linha->facilidades->atend_automatico_destino."'")->first();
 		
-		$this->agi->write_console(__FILE__,__LINE__, "Executando ura ");
+		Logger::write(__FILE__,__LINE__, "Executando ura ");
 
 		if(!$ura){
-			$this->agi->write_console(__FILE__,__LINE__, "Não foi possível encontrar a ura.".$this->linha->facilidades->atend_automatico_destino);
+			Logger::write(__FILE__,__LINE__, "Não foi possível encontrar a ura.".$this->linha->facilidades->atend_automatico_destino);
 			exit;
 		}
 
@@ -45,10 +48,10 @@ class AtendAutomaticoManager {
 	public function execGrupo(){
 		$grupo = GruposAtendimento::whereRaw("MD5(id) = '".$this->linha->facilidades->atend_automatico_destino."'")->first();
 
-		$this->agi->write_console(__FILE__,__LINE__, "Executando grupo ");
+		Logger::write(__FILE__,__LINE__, "Executando grupo ");
 
 		if(!$grupo){
-			$this->agi->write_console(__FILE__,__LINE__, "Não foi possível encontrar o grupo.".$this->linha->facilidades->atend_automatico_destino);
+			Logger::write(__FILE__,__LINE__, "Não foi possível encontrar o grupo.".$this->linha->facilidades->atend_automatico_destino);
 			exit;
 		}
 
@@ -60,15 +63,13 @@ class AtendAutomaticoManager {
 		$fila = Filas::whereRaw("MD5(id) = '".$this->linha->facilidades->atend_automatico_destino."'")
 						->first();
 		
-		$this->agi->write_console(__FILE__,__LINE__, "Executando fila ");
-
-		$this->agi->write_console(__FILE__,__LINE__, "Não foi possível encontrar a fila.".$fila->nome);
-
 		if(!$fila){
-			$this->agi->write_console(__FILE__,__LINE__, "Não foi possível encontrar a fila.".$this->linha->facilidades->atend_automatico_destino);
+			Logger::write(__FILE__, __LINE__, "Não foi possível encontrar a fila.".$this->linha->facilidades->atend_automatico_destino);
 			exit;
 		}
+
+		$manager = new FilasManager();
+		$manager->execFila($fila);
 		
-		$this->agi->exec("Queue", $fila->nome);
 	}
 }

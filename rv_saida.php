@@ -10,6 +10,7 @@ require_once __DIR__."/Classes/DbHelper.php";
 require_once __DIR__."/Classes/Numero.php";
 require_once __DIR__."/Classes/BillCalculator.php";
 require_once __DIR__."/Classes/VerificadorPortabilidade.php";
+require_once __DIR__."/Classes/VerificadorPermissoes.php";
 
 require_once __DIR__."/Models/Linhas/DadosAutenticacaoLinhas.php";
 require_once __DIR__."/Models/Linhas/DadosConfiguracoesLinhas.php";
@@ -31,6 +32,7 @@ $ligacao->setAgi($agi);
 $ligacao->setTipo('sainte');
 
 $callerid = new Numero($agi->get_variable("CALLERID(num)")['data']);
+$exten = new Numero($agi->get_variable("EXTEN")['data']);
 
 $agi->write_console(__FILE__,__LINE__, "CALLERID: ".$callerid->getNumeroCompleto(), $verbose);
 
@@ -51,6 +53,22 @@ if(!$autenticacao_linha){
 } 
 
 $linha = Linhas::complete()->find($autenticacao_linha->linha_id);
+
+/** VERIFICA PERMISSÕES **/
+	
+	$verif_permissoes = new VerificadorPermissoes($agi);
+
+	$hasPermissao = $verif_permissoes->verificar($linha->permissoes, $exten);
+	
+	if(!$hasPermissao){
+		foreach ($verif_permissoes->getErros() as $erro){
+			$agi->write_console(__FILE__,__LINE__, $erro, $verbose);
+		}
+		exit;
+	}
+
+/************************/
+
 $agi->set_variable("CDR(src_account)", $linha->autenticacao->login_ata);
 
 
@@ -68,7 +86,6 @@ if(!$linha){
 	die(1);
 }
 
-$exten = new Numero($agi->get_variable("EXTEN")['data']);
 $agi->set_variable("CDR(dst_type)", $exten->getTipo());
 
 if(empty($exten->getDDD())){

@@ -1,14 +1,15 @@
 <?php
 
+require_once __DIR__."/Log/Logger.php";
+require_once __DIR__."/Agi.php";
+
 class Aplicacao {
 	private $linha;
 	private $ligacao;
-	//private $db;
 	private $agi;
 
-	public function __construct(AGI $agi, Ligacao $ligacao, Linhas $linha, Configuracoes $config){
-		$this->agi = $agi;
-		//$this->db = $db;
+	public function __construct(Ligacao $ligacao, Linhas $linha, Configuracoes $config){
+		$this->agi = AGI::getSingleton();
 		$this->ligacao = $ligacao;
 		$this->linha = $linha;
 		$this->config = $config;
@@ -21,9 +22,9 @@ class Aplicacao {
 			$app = substr($app , 1);
 		}
 
-		$this->agi->write_console(__FILE__, __LINE__, "atalho_sigam_me: ".$this->config->atalho_siga_me);
-		$this->agi->write_console(__FILE__, __LINE__, "atalho_cadeado: ".$this->config->atalho_cadeado);
-		$this->agi->write_console(__FILE__, __LINE__, "app ".$app);
+		Logger::write(__FILE__, __LINE__, "atalho_sigam_me: ".$this->config->atalho_siga_me);
+		Logger::write(__FILE__, __LINE__, "atalho_cadeado: ".$this->config->atalho_cadeado);
+		Logger::write(__FILE__, __LINE__, "app ".$app);
 
 		if($app == $this->config->atalho_siga_me){
 			$this->sigaMe();
@@ -43,7 +44,7 @@ class Aplicacao {
 		$linha = $this->linha;
 		$novo_estado = !(boolean)$linha->facilidades->cadeado_pessoal;
 
-		$this->agi->write_console(__FILE__,__LINE__, "novo_estado: ".$novo_estado );
+		Logger::write(__FILE__,__LINE__, "novo_estado: ".$novo_estado );
 
 		$linha->facilidades->update([
 				"cadeado_pessoal"=>+$novo_estado,
@@ -52,6 +53,7 @@ class Aplicacao {
 		$audio = $novo_estado ? 'cadeado_on' : 'cadeado_off';
 
 		$this->agi->exec('playback', $audio);
+		
 	}
 
 	/**
@@ -66,7 +68,7 @@ class Aplicacao {
 	    if($linha->facilidades->siga_me == 0){
 	    	$telefone = $this->agi->get_data('digite_telefone', 4*1000, 5);
 
-	    	$this->agi->write_console(__FILE__,__LINE__, "Ativando siga-me para o telefone: ".$telefone['result']);
+	    	Logger::write(__FILE__,__LINE__, "Ativando siga-me para o telefone: ".$telefone['result']);
 
 	    	$linha->facilidades->update([
 	    			"siga_me" => 1,
@@ -75,7 +77,7 @@ class Aplicacao {
 
 	        /* Desativa o siga_me */
 	    } else {
-	       	$this->agi->write_console(__FILE__,__LINE__, "Desativando siga-me");
+	       	Logger::write(__FILE__,__LINE__, "Desativando siga-me");
 
 	       	$this->agi->stream_file("siga_me_desativado");
 

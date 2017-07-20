@@ -1,8 +1,10 @@
 <?php
-require_once(__DIR__."/../Traits/WriteConsoleTrait.php");
+
+require_once __DIR__."/Numero.php";
+require_once __DIR__."/Log/Logger.php";
+require_once __DIR__."/Agi.php";
 
 class Ligacao {
-	use WriteConsoleTrait;
 
 	private $exten;
 	private $callerid;
@@ -20,6 +22,7 @@ class Ligacao {
 	
 	function __construct(){
 		$this->date = date('H-i-s-d-m-Y');
+		$this->agi = AGI::getSingleton();
 	}
 	
 
@@ -32,17 +35,6 @@ class Ligacao {
 
 	}
 
-	/*public function setGravacao(Gravacoes $gravacao){
-		$gravacao->callerid = $this->callerid->getNumero();
-		$gravacao->exten = $this->exten->getNumero();
-		$gravacao->unique_id = $this->unique_id;
-		$gravacao->data = $this->data;
-		$gravacao->assinante = $this->linha->assinante_id;
-		$gravacao->linha = $this->linha->id;
-
-		$this->gravacao = $gravacao;		
-	}*/
-	
 	public function setTarifa($tarifa){
 		$this->tarifa = $tarifa;
 	}
@@ -112,7 +104,7 @@ class Ligacao {
 			
 			$this->agi->answer();
 			$this->agi->exec("playback", "cadeado");
-			$this->agi->write_console(__FILE__,__LINE__, "CADEADO ATIVO", $this->verbose);
+			Logger::write(__FILE__,__LINE__, "CADEADO ATIVO", $this->verbose);
 			$this->agi->hangup();
 
 		}
@@ -123,19 +115,18 @@ class Ligacao {
 		$facilidades_linha = $this->linha->facilidades;
 
 		if($facilidades_linha->siga_me == 1 && strlen($facilidades_linha->num_siga_me)){
-			$this->write_console(__FILE__,__LINE__,  "SIGA ME ATIVO", $this->verbose);
-			$this->write_console(__FILE__,__LINE__,  "NUM SIGA ME: ".$linha['num_siga_me'],$this->verbose);
+			Logger::write(__FILE__,__LINE__,  "SIGA ME ATIVO", $this->verbose);
+			Logger::write(__FILE__,__LINE__,  "NUM SIGA ME: ".$facilidades_linha['num_siga_me'],$this->verbose);
 			
-			$this->setExten($linha['num_siga_me']);
+			$this->setExten(new Numero($facilidades_linha['num_siga_me']));
 		}
 	}
 
-	
-	public function execVoiceMail(){
+	/*public function execVoiceMail(){
 		$facilidades_linha = $this->linha->facilidades;
 
 		if($facilidades_linha->caixa_postal == 1){
-			$this->write_console(__FILE__,__LINE__, 'VOICE MAIL ATIVADO' , $this->verbose);	
+			Logger::write(__FILE__,__LINE__, 'VOICE MAIL ATIVADO' , $this->verbose);	
 
 			$email_data = array("data"=>array('receptor'=>$facilidades_linha->cx_postal_email),
 						        "exten"=>$this->getExten(),
@@ -146,8 +137,6 @@ class Ligacao {
 
 			$this->agi->exec('VoiceMail', $this->getExtenObj()->getNumero()."@"."rv_correio_voz");
 			$status = $this->agi->get_variable('VMSTATUS')['data'];
-
-			$file = '';
 			
 			if($status == 'SUCCESS'){
 				return 1;
@@ -155,9 +144,9 @@ class Ligacao {
 
 			return 0;
 		} else {
-			$this->write_console(__FILE__,__LINE__,'VOICE MAIL DESATIVADO',$this->verbose);	
+			Logger::write(__FILE__,__LINE__,'VOICE MAIL DESATIVADO',$this->verbose);	
 		}
-	}
+	}*/
 
 
 	public function setExten(Numero $exten){
@@ -165,9 +154,9 @@ class Ligacao {
 	}
 
 
-	public function setAgi(AGI $agi){
+	/*public function setAgi(AGI $agi){
 		$this->agi = $agi;
-	}
+	}*/
 
 
 	public function setCallerId(Numero $callerid){

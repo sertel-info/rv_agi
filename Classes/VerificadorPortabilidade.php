@@ -1,5 +1,8 @@
 <?php
 
+require_once __DIR__."/Log/Logger.php";
+require_once __DIR__."/Agi.php";
+
 class VerificadorPortabilidade {
 
 	private $num;
@@ -24,15 +27,15 @@ class VerificadorPortabilidade {
 	}
 
 	public function getOperadora(){
-		//$this->write_console(__FILE__,__LINE__, "Setando ddd ".$this->ddd);
+		//Logger::write(__FILE__,__LINE__, "Setando ddd ".$this->ddd);
 
 		/*if(!$this->db){
-		  	$this->write_console(__FILE__, __LINE__, "BANCO DE DADOS INVÁLIDO");
+		  	Logger::write(__FILE__, __LINE__, "BANCO DE DADOS INVÁLIDO");
 		  	return;
 		}*/
 
 		if($this->num->getTipo() !== 'movel'){		    	
-		 	//$this->write_console(__FILE__, __LINE__, "PULANDO PESQUISA DE PORTABILIDADE PARA O TIPO ".$this->tipo);
+		 	//Logger::write(__FILE__, __LINE__, "PULANDO PESQUISA DE PORTABILIDADE PARA O TIPO ".$this->tipo);
 		  	return;
 		}
 
@@ -61,8 +64,8 @@ class VerificadorPortabilidade {
 
 		return $operadora;*/
 
-		/*$this->write_console(__FILE__, __LINE__, "Número Portado : ".($this->isPortado?'SIM':'NAO'), $this->verbose);
-		$this->write_console(__FILE__, __LINE__, "Operadora do número : ".$this->operadora, $this->verbose);*/
+		/*Logger::write(__FILE__, __LINE__, "Número Portado : ".($this->isPortado?'SIM':'NAO'), $this->verbose);
+		Logger::write(__FILE__, __LINE__, "Operadora do número : ".$this->operadora, $this->verbose);*/
 	}
 
 	public function getOperadoraPortada(){

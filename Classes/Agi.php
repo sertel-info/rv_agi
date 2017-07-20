@@ -1,5 +1,5 @@
-    <?php
-    require_once(__DIR__."/../Traits/WriteConsoleTrait.php");
+<?php
+    require_once __DIR__."/Singleton.php";
     //require_once(__DIR__."/Singleton.php");
 
 
@@ -87,9 +87,8 @@
     * @example examples/input.php Get text input from the user and say it back
     * @example examples/ping.php Ping an IP address
     */
-    class AGI
+    class AGI extends Singleton
     {   
-        use WriteConsoleTrait;
         /**
         * Request variables read in on initialization.
         *

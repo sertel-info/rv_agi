@@ -1,12 +1,11 @@
 <?php
 
-
 use Illuminate\Database\Eloquent\Model;
 require_once __DIR__."/Linhas.php";
 
 class DadosPermissoesLinhas extends Model
 {
-    protected $table = "dados_permissoes_linhas";
+    protected $table = 'dados_permissoes_linhas';
 
     protected $fillable = [
     						"ligacao_fixo",

@@ -6,27 +6,29 @@ require_once __DIR__."/Classes/Connections.php";
 require_once __DIR__."/Classes/Dial.php";
 require_once __DIR__."/Classes/Agi.php";
 require_once __DIR__."/Classes/Ligacao.php";
-require_once __DIR__."/Classes/DbHelper.php";
 require_once __DIR__."/Classes/GruposManager.php";
 require_once __DIR__."/Classes/Numero.php";
 require_once __DIR__."/Classes/UraManager.php";
 require_once __DIR__."/Classes/Saudacao.php";
 require_once __DIR__."/Classes/AtendAutomaticoManager.php";
+require_once __DIR__."/Classes/Log/Logger.php";
 
 require_once __DIR__."/Models/Linhas/Dids.php";
 
 date_default_timezone_set('America/Sao_Paulo');
 $verbose = true;
 
-$agi = new AGI();
+$agi = AGI::getSingleton();
 
 $agi->set_variable("CDR(type)", "entrante");
 $ligacao = new Ligacao();
 $ligacao->setTipo('entrante');
-$ligacao->setAgi($agi);
 
 $callerid = new Numero($agi->get_variable("CALLERID(num)")['data']);
 $exten = new Numero($agi->get_variable("EXTEN")['data']);
+
+Logger::write(__FILE__, __LINE__, "Callerid ".$callerid->getNumero());
+Logger::write(__FILE__, __LINE__, "Exten ".$exten->getNumero());
 
 $agi->set_variable("CDR(dst_type)", $exten->getTipo());
 
@@ -36,7 +38,7 @@ $ligacao->setExten($exten);
 $did_linha = Dids::where('extensao_did', $exten->getNumeroCompleto())->first();
 
 if(!$did_linha){
-	$agi->write_console(__FILE__,__LINE__, "FALHA AO ENCONTRAR EXTENSÃO: ".$exten->getNumeroCompleto(), $verbose);
+	Logger::write(__FILE__,__LINE__, "FALHA AO ENCONTRAR EXTENSÃO: ".$exten->getNumeroCompleto(), $verbose);
 	die(1);
 } 
 
@@ -48,7 +50,7 @@ $agi->set_variable("CDR(dst_account)", $linha->autenticacao->login_ata);
 if( $linha->assinante->facilidades->saudacoes == 1 && 
    ($destino = $linha->facilidades->saudacoes_destino) !== null){
 	
-	$agi->write_console(__FILE__,__LINE__, "SAUDAÇÃO ATIVA ".$destino);
+	Logger::write(__FILE__,__LINE__, "SAUDAÇÃO ATIVA ".$destino);
 
 	$saudacoes =  $linha->assinante->saudacoes()->whereRaw("MD5(id) = '".$destino."'")->get();
 
@@ -58,10 +60,12 @@ if( $linha->assinante->facilidades->saudacoes == 1 &&
 	}
 }
 
+/******************/
+
 /** ATENDIMENTO AUTOMÁTICO **/
 
 if($linha->facilidades->atend_automatico == 1){
-	$agi->write_console(__FILE__,__LINE__, "ATENDIMENTO AUTOMÁTICO ATIVO : ".$linha->facilidades->atend_automatico_tipo);
+	Logger::write(__FILE__,__LINE__, "ATENDIMENTO AUTOMÁTICO ATIVO : ".$linha->facilidades->atend_automatico_tipo);
 	$atend_auto = new AtendAutomaticoManager($linha, $agi);
 	$atend_auto->exec();
 	exit;
@@ -100,6 +104,12 @@ if($grupo_atend_model){
 
 $dial->exec();
 
-if(in_array($dial->getLastStatus(), ['NOANSWER', 'BUSY', 'CONGESTION'])){
-	$ligacao->execVoiceMail();
+if(in_array($dial->getLastStatus(), ['NOANSWER', 'BUSY', 'CONGESTION'])
+	&& $linha->facilidades->caixa_postal == 1){
+	Logger::write(__FILE__,__LINE__, "Voicemail : ATIVADO");
+	Logger::write(__FILE__,__LINE__, "Executando VoiceMail...");
+
+	$manager = new VoiceMailManager();
+	$vm = $manager->createVoiceMail(new Numero($linha->autenticacao->login_ata));
+	$manager->execVoiceMail($vm);
 }

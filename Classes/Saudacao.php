@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__."/Agi.php";
 
 class Saudacao {
 
@@ -6,10 +7,10 @@ class Saudacao {
 	private $audio;
 	private $ago;
 
-	function __construct($saudacao, $audio, $agi){
+	function __construct($saudacao, $audio){
 		$this->saudacao = $saudacao;
 		$this->audio = $audio;
-		$this->agi = $agi;
+		$this->agi = AGI::getSingleton();
 	}
 
 	public function exec(){

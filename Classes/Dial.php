@@ -1,5 +1,8 @@
 <?php
 
+require_once __DIR__."/Log/Logger.php";
+require_once __DIR__."/Agi.php";
+
 class Dial{
 	
 	private $agi;
@@ -7,7 +10,7 @@ class Dial{
 	private $tech_prefix = '';
 	private $tempo_chamada = 30;
 	private $tecnologia;
-	private $opcoes = 'Tt';
+	private $opcoes = 'Ttg';
 	private $ligacao;
 	private $arquivos_troncos = __DIR__."/../rv_troncos.ini";
 	private $last_status;
@@ -18,7 +21,7 @@ class Dial{
 
 	function __construct(Ligacao $ligacao){
 		$this->ligacao = $ligacao;
-		$this->agi = $ligacao->getAgi();
+		$this->agi = AGI::getSingleton();
 
 		$linha = $ligacao->getLinha();
 
@@ -26,7 +29,7 @@ class Dial{
 			$this->tecnologia = $linha->tecnologia;
 		}
 		
-		$this->agi->write_console(__FILE__,__LINE__, "TECNOLOGIA DA LIGAÇÃO:".$this->tecnologia );
+		Logger::write(__FILE__,__LINE__, "TECNOLOGIA DA LIGAÇÃO:".$this->tecnologia );
 	}
 
 	public function gerarPrefixos(){
@@ -36,7 +39,7 @@ class Dial{
 			$prefixos_tronco = explode('+', $this->modo_prefixo);
 
 			foreach($prefixos_tronco as $el){
-				$this->agi->write_console(__FILE__,__LINE__, "PREFIXO TRONCO ".$el, $this->verbose);
+				Logger::write(__FILE__,__LINE__, "PREFIXO TRONCO ".$el, $this->verbose);
 
 				if($el == 'operadora')
 					$prefixo .= $this->ligacao->getExtenObj()->getOperadora();
@@ -56,7 +59,7 @@ class Dial{
 	}
 
 	public function getDialString(){
-		$this->agi->write_console(__FILE__,__LINE__, "GET DIAL ", $this->verbose);
+		Logger::write(__FILE__,__LINE__, "GET DIAL ", $this->verbose);
 		
 		if(!isset($this->tecnologia)){
 			$tecnologia = 'sip';
@@ -64,10 +67,10 @@ class Dial{
 			$tecnologia = strtolower($this->tecnologia);
 		}
 		
-		$this->agi->write_console(__FILE__,__LINE__, "TECNOLOGIA ".$tecnologia, $this->verbose);
+		Logger::write(__FILE__,__LINE__, "TECNOLOGIA ".$tecnologia, $this->verbose);
 
 		$numero_formatado = $this->gerarPrefixos().$this->ligacao->getExtenObj()->getNumero();
-		$this->agi->write_console(__FILE__,__LINE__, "NUMERO FORMATADO ".$this->ligacao->getExten(), $this->verbose);
+		Logger::write(__FILE__,__LINE__, "NUMERO FORMATADO ".$this->ligacao->getExten(), $this->verbose);
 
 		if($tecnologia == 'sip'){
 
@@ -92,7 +95,7 @@ class Dial{
 
 		} 
 		
-		$this->agi->write_console(__FILE__,__LINE__, "DIAL:".$dial );
+		Logger::write(__FILE__,__LINE__, "DIAL:".$dial );
 		return $dial;
 	}
 
@@ -123,8 +126,6 @@ class Dial{
 		$this->verificaTempoMax();
 		$tipo_ligacao = $this->ligacao->getTipo();
 
-		$this->agi->write_console(__FILE__, __LINE__, 'Tipos: '.$tipo_ligacao.'/'.$this->ligacao->getExtenObj()->getTipo());
-
 		if($tipo_ligacao == 'sainte' 
 			&& in_array($this->ligacao->getExtenObj()->getTipo(), ['fixo', 'movel', 'servico'])){
 
@@ -142,17 +143,17 @@ class Dial{
 	public function getRotas(){
 		$rotas_linha = json_decode($this->ligacao->getLinha()->configuracoes->rotas_saida);
 
-		$this->agi->write_console(__LINE__, __FILE__, "Rotas: ".var_export($rotas_linha, true) ,true);
+		Logger::write(__LINE__, __FILE__, "Rotas: ".var_export($rotas_linha, true) ,true);
 
 		$troncos_arquivo = parse_ini_file($this->arquivos_troncos, true);
 		
 		if($troncos_arquivo == null || $troncos_arquivo == false){
-		$this->agi->write_console(__LINE__, __FILE__, "FALHA AO LER O ARQUIVO DE TRONCOS NO CAMINHO: ".$this->arquivos_troncos,true);
+		Logger::write(__LINE__, __FILE__, "FALHA AO LER O ARQUIVO DE TRONCOS NO CAMINHO: ".$this->arquivos_troncos,true);
 		}
 		
 
 		$rotas = array();
-		/*$this->agi->write_console(__LINE__, __FILE__, var_export( array_intersect_key($troncos_arquivo, array_flip($troncos_linha)),true))*/;
+		/*Logger::write(__LINE__, __FILE__, var_export( array_intersect_key($troncos_arquivo, array_flip($troncos_linha)),true))*/;
 
 		array_walk($rotas_linha, function($rota, $key) use ($troncos_arquivo, &$rotas){
 
@@ -180,7 +181,7 @@ class Dial{
 	public function setTechPrefix(){
 
 		if(!isset($this->tronco['tech_prefix'])){
-			//$this->agi->write_console(__FILE__,__LINE__, "!! ERRO AO LER TECH PREFIX DO TRONCO !!", $this->verbose);
+			//Logger::write(__FILE__,__LINE__, "!! ERRO AO LER TECH PREFIX DO TRONCO !!", $this->verbose);
 			$this->tech_prefix = '';
 			return;
 		}
@@ -216,7 +217,7 @@ class Dial{
 	}
 
 	public function execServico(){
-		$this->agi->write_console(__FILE__,__LINE__, "exec servico", $this->verbose);
+		Logger::write(__FILE__,__LINE__, "exec servico", $this->verbose);
 		$this->dial($this->getDialGsm());
 	}
 
@@ -229,7 +230,7 @@ class Dial{
 		$tipo = $this->ligacao->getExtenObj()->getTipo();
 
 		if($tipo == 'movel'){
-			$this->agi->write_console(__FILE__,__LINE__, "exec movel", $this->verbose);
+			Logger::write(__FILE__,__LINE__, "exec movel", $this->verbose);
 			$this->execFixo();
 			return;
 		} else if($tipo == 'fixo'){
@@ -240,7 +241,7 @@ class Dial{
 	}
 
 	public function execEntreRamais(){
-		$this->agi->write_console(__FILE__,__LINE__, "Executando chamada entre ramais", $this->verbose);
+		Logger::write(__FILE__,__LINE__, "Executando chamada entre ramais", $this->verbose);
 	
 		$this->tronco = null;
 
@@ -252,19 +253,19 @@ class Dial{
 		$linha = $this->ligacao->getLinha();
 
 		$rotas = $this->getRotas();
-		$this->agi->write_console(__LINE__, __FILE__, "R ".var_export($rotas, true) ,true);
+		Logger::write(__LINE__, __FILE__, "R ".var_export($rotas, true) ,true);
 
 		$tentativas = 0;
 		
 		if(!count($rotas)){
-			$this->agi->write_console(__FILE__,__LINE__, "Nenhum tronco apropriado encontrado", $this->verbose);
+			Logger::write(__FILE__,__LINE__, "Nenhum tronco apropriado encontrado", $this->verbose);
 			die(1);
 		}
 
 		foreach($rotas as $nome_rota=>$rota){
 
 			if($nome_rota == 'EBS' && $this->ligacao->getExtenObj()->getTipo() == "movel"){
-				$this->agi->write_console(__FILE__,__LINE__, "exec ebs", $this->verbose);
+				Logger::write(__FILE__,__LINE__, "exec ebs", $this->verbose);
 				$this->dial($this->getDialGsm());
 				continue;
 			}
@@ -291,10 +292,10 @@ class Dial{
 				$this->opcoes .= "r";	
 			}
 
-			$this->agi->write_console(__FILE__,__LINE__, "TENTATIVA : ".$tentativas, $this->verbose);
-			$this->agi->write_console(__FILE__,__LINE__, "TRONCO : ".$nome_rota,   $this->verbose);
-			//$this->agi->write_console(__FILE__,__LINE__, "DIAL STATUS: ".$dial_status, $this->verbose);
-			$this->agi->write_console(__FILE__,__LINE__, "exec tronco", $this->verbose);
+			Logger::write(__FILE__,__LINE__, "TENTATIVA : ".$tentativas, $this->verbose);
+			Logger::write(__FILE__,__LINE__, "TRONCO : ".$nome_rota,   $this->verbose);
+			//Logger::write(__FILE__,__LINE__, "DIAL STATUS: ".$dial_status, $this->verbose);
+			Logger::write(__FILE__,__LINE__, "exec tronco", $this->verbose);
 			$this->dial($this->getDialString());
 			
 			$tentativas++;
@@ -306,7 +307,7 @@ class Dial{
 	}
 
 	public function execEntrante(){
-		$this->agi->write_console(__FILE__,__LINE__, "Executanto chamada entrante ", $this->verbose);
+		Logger::write(__FILE__,__LINE__, "Executanto chamada entrante ", $this->verbose);
 		$this->tronco = null;
 
 		$this->dial($this->getDialString());

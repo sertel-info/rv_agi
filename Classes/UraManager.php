@@ -6,6 +6,8 @@ require_once __DIR__."/../Models/GruposAtendimento/GruposAtendimento.php";
 require_once __DIR__."/Ligacao.php";
 require_once __DIR__."/Numero.php";
 require_once __DIR__."/GruposManager.php";
+require_once __DIR__."/Agi.php";
+require_once __DIR__."/Log/Logger.php";
 
 class UraManager{
 	private $ura;
@@ -29,16 +31,15 @@ class UraManager{
 		'57'=>'9'
 	];
 
-	function __construct($ura, AGI $agi){
+	function __construct($ura){
 		$this->ura = $ura;
-		//$this->dial_class = $dial_class;
-		$this->agi = $agi;
+		$this->agi = AGI::getSingleton();
 	}
 
 	public function exec(){
 	
 		//$audio_app = $this->getAudioApp();
-		$this->agi->write_console(__FILE__,__LINE__, "TIPO AUDIO ".$this->ura->tipo_audio);
+		Logger::write(__FILE__,__LINE__, "TIPO AUDIO ".$this->ura->tipo_audio);
 
 		if($this->ura->tipo_audio == "obrigatorio"){
 			$ascii_digito = $this->execPlayback();
@@ -48,7 +49,7 @@ class UraManager{
 
 		if($ascii_digito > 0){
 			$digito = $this->trans_ascii_digits[$ascii_digito];
-			$this->agi->write_console(__FILE__,__LINE__, "DIGITO ".$digito);
+			Logger::write(__FILE__,__LINE__, "DIGITO ".$digito);
 
 			$this->execOption($digito);
 
@@ -101,10 +102,10 @@ class UraManager{
 
 
 	public function callGrupo($destino_md5_id){
-		$this->agi->write_console(__FILE__,__LINE__, "Destino: ".$destino_md5_id);
+		Logger::write(__FILE__,__LINE__, "Destino: ".$destino_md5_id);
 
 		$grupo_atend_model = GruposAtendimento::whereRaw(" MD5(id) = '".$destino_md5_id."'")->first();
-		$this->agi->write_console(__FILE__,__LINE__, "grupo_model: ".$grupo_atend_model->id);
+		Logger::write(__FILE__,__LINE__, "grupo_model: ".$grupo_atend_model->id);
 
 		$ligacao = new Ligacao();
 		//$ligacao->setLinha();
@@ -122,8 +123,8 @@ class UraManager{
 							                    ->orderBy('pivot_posicao')
 							                    ->get();
 			
-			$this->agi->write_console(__FILE__,__LINE__, "Chamando grupo: ".$grupo_atend_model->id);
-			$this->agi->write_console(__FILE__,__LINE__, "Tipo grupo: ".$grupo_atend_model->tipo);
+			Logger::write(__FILE__,__LINE__, "Chamando grupo: ".$grupo_atend_model->id);
+			Logger::write(__FILE__,__LINE__, "Tipo grupo: ".$grupo_atend_model->tipo);
 
 			$grupo = new GruposManager($grupo_atend_model, $this->agi);
 			$grupo->exec();
@@ -134,7 +135,7 @@ class UraManager{
 	public function callFila($destino_md5_id){
 
 		$fila = Filas::whereRaw("MD5(id) = '".$destino_md5_id."'")->first();
-		$this->agi->write_console(__FILE__,__LINE__, "LIGANDO PARA FILA ".$fila->nome);
+		Logger::write(__FILE__,__LINE__, "LIGANDO PARA FILA ".$fila->nome);
 
 		$this->agi->exec("Queue", $fila->nome);
 	}
