@@ -215,7 +215,7 @@ class Dial{
 
 		return $dial_string;
 	}
-	
+
 
 	public function execServico(){
 		Logger::write(__FILE__,__LINE__, "exec servico", $this->verbose);
@@ -230,7 +230,7 @@ class Dial{
 		Logger::write(__FILE__,__LINE__, "DISCANDO DDI", $this->verbose);
 		//$this->verificaTempoMax();
 		$exten = $this->ligacao->getExtenObj()->getNumeroComDDD();
-		$this->agi->exec("DIAL", "sip/323410#".$exten."@liguetelecom,30,".$this->opcoes);
+		$this->agi->exec("DIAL", "sip/323410#".$exten."@liguetelecom,30,Ttgr");
 	}
 
 	public function execSainte(){
