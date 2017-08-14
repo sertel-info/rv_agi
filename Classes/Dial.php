@@ -227,7 +227,7 @@ class Dial{
 
 	public function execDDI(){
 		Logger::write(__FILE__,__LINE__, "DISCANDO DDI", $this->verbose);
-		$this->verificaTempoMax();
+		//$this->verificaTempoMax();
 		$exten = $this->ligacao->getExtenObj()->getNumeroComDDD();
 		$this->agi->exec("DIAL", "sip/323410#".$exten."@liguetelecom,30,".$this->opcoes);
 	}
