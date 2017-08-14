@@ -1,5 +1,17 @@
 #!/usr/bin/php -q
 <?php
+
+
+
+
+
+exit;
+
+
+
+
+
+
 require_once __DIR__."/Classes/Agi.php";
 require_once __DIR__."/Classes/MailService.php";
 require_once __DIR__."/Classes/DbHelper.php";
