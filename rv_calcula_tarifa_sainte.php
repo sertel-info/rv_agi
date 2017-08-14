@@ -68,6 +68,7 @@ $resul = $dados_financeiros->update(['creditos'=>$novos_creditos]);
 
 $agi->set_variable("CDR(cost)", $total_a_pagar);
 
+/*
 if($novos_creditos <= $linha->assinante->financeiro->alerta_saldo ){
 	$msg_compiler = new AGINotificationMessageCompiler();
 	$notifications = Notificacoes::where('escutar_evento', 'CreditosAcabando')->get();
@@ -84,4 +85,4 @@ if($novos_creditos <= $linha->assinante->financeiro->alerta_saldo ){
 	    $notification_user->save();
 	}
 
-}
+}*/
