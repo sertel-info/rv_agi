@@ -19,6 +19,7 @@ require_once __DIR__."/Models/Portabilidade/Numeros.php";
 require_once __DIR__."/Models/Portabilidade/Operadoras.php";
 require_once __DIR__."/Models/Portabilidade/Prefixos.php";
 
+
 $verbose = true;
 
 date_default_timezone_set('America/Sao_Paulo');
@@ -91,6 +92,8 @@ if(empty($exten->getDDD())){
 	$exten->setDDD($linha->ddd_local);
 }
 
+
+
 $agi->set_variable("CDR(dst)", $exten->getNumeroComDDD());
 
 $verif_portab = new VerificadorPortabilidade($exten,
@@ -108,9 +111,17 @@ $ligacao->setLinha($linha);
 
 $ligacao->verificaCadeado();
 
-$ligacao->setTarifa($linha->assinante->planos()->first()->__get('valor_'  . 
-											$exten->getTipo() . '_' .
-											($exten->isDDD() ? 'ddd' : 'local')));
+$titulo_tarifa = "valor";
+
+if($exten->isDDD()){
+	$titulo_tarifa .= $exten->getTipo()."_ddd";
+} else if($exten->isDDI()){
+	$titulo_tarifa .= "_ddi";
+} else {
+	$titulo_tarifa .= $exten->getTipo()."_local";
+}
+
+$ligacao->setTarifa($linha->assinante->planos()->first()->__get($titulo_tarifa));
 
 $ligacao->setLimiteTempo(BillCalculator::calcTempoMaxLigacao($ligacao));
 

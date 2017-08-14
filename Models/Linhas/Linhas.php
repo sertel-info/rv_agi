@@ -8,6 +8,7 @@ require_once __DIR__."/DadosConfiguracoesLinhas.php";
 require_once __DIR__."/DadosFacilidadesLinhas.php";
 require_once __DIR__."/DadosPermissoesLinhas.php";
 require_once __DIR__."/Dids.php";
+require_once __DIR__."/../Planos/Planos.php";
 require_once __DIR__."/../Uras/Uras.php";
 require_once __DIR__."/../GruposAtendimento/GruposAtendimento.php";
 
@@ -82,5 +83,14 @@ class Linhas extends Model
     public function grupos()
     {
         return $this->belongsToMany(GruposAtendimento::class, 'grupos_linhas', 'linha_id', 'grupo_id');
+    }
+
+    public function plano(){
+    	//tenta pegar o plano da linha, se não pega o plano do assinante
+    	if($this->plano == null){
+    		return $this->assinante->planos;
+    	}
+
+    	return $this->hasOne(Planos::class, 'plano', 'id')->first();
     }
 }

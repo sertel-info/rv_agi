@@ -19,5 +19,9 @@ class DadosFinanceiroAssinante extends Model
 	public function assinante(){
 		return $this->belongsTo(Assinantes::class, 'assinante_id');
 	}
+
+	public function getAlertaSaldoAttribute($value){
+		return floatval($value);
+	}
     
 }

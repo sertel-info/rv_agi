@@ -15,6 +15,10 @@ require_once __DIR__."/Classes/Log/Logger.php";
 
 require_once __DIR__."/Models/Linhas/Dids.php";
 
+require_once __DIR__."/Models/Notificacoes/Notificacoes.php";
+require_once __DIR__."/Models/Notificacoes/NotificacoesUsers.php";
+require_once __DIR__."/Classes/Notificacoes/AGINotificationMessageCompiler.php";
+
 date_default_timezone_set('America/Sao_Paulo');
 $verbose = true;
 

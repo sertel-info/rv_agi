@@ -52,7 +52,7 @@ class BillCalculator{
 	}
 
 	public static function calcTarifa($tipo, $tarifa, $tempo){
-		if(!in_array($tipo, ['movel', 'fixo']))
+		if(!in_array($tipo, ['movel', 'fixo', 'ddi']))
 			return false;
 
 		if($tipo == 'movel'){
@@ -62,13 +62,16 @@ class BillCalculator{
 		}
 	}
 
+
 	public static function calcTempoMaxLigacao(Ligacao $ligacao){
 		$saldo = $ligacao->getLinha()->assinante->financeiro->creditos;
-		if($ligacao->getTipo() == 'fixo'){
-			return self::calcTempoMaxFixo($ligacao->getTarifa(), $saldo);
+		$exten = $ligacao->getExtenObj();
+		
+		if($exten->getTipo() == 'movel' || $exten->getTipo() == 'ddi'){
+			return self::calcTempoMaxMovel($ligacao->getTarifa(), $saldo);
 		}
 
-		return self::calcTempoMaxMovel($ligacao->getTarifa(), $saldo);
+		return self::calcTempoMaxFixo($ligacao->getTarifa(), $saldo);
 	}
 
 	public static function calcTempoMaxFixo($tarifa, $saldo){

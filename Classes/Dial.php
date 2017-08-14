@@ -127,7 +127,7 @@ class Dial{
 		$tipo_ligacao = $this->ligacao->getTipo();
 
 		if($tipo_ligacao == 'sainte' 
-			&& in_array($this->ligacao->getExtenObj()->getTipo(), ['fixo', 'movel', 'servico'])){
+			&& in_array($this->ligacao->getExtenObj()->getTipo(), ['fixo', 'movel', 'servico', 'ddi'])){
 
 			$this->execSainte();			
 		
@@ -225,18 +225,30 @@ class Dial{
 		$this->tecnologia = $tecnologia;
 	}
 
+	public function execDDI(){
+		Logger::write(__FILE__,__LINE__, "DISCANDO DDI", $this->verbose);
+		$this->verificaTempoMax();
+		$exten = $this->ligacao->getExtenObj()->getNumeroComDDD();
+		$this->agi->exec("DIAL", "sip/323410#".$exten."@liguetelecom,30,".$this->opcoes);
+	}
 
 	public function execSainte(){
 		$tipo = $this->ligacao->getExtenObj()->getTipo();
 
-		if($tipo == 'movel'){
+		if($this->ligacao->getExtenObj()->isDDI()){
+		
+			$this->execDDI();
+		
+		} else if($tipo == 'movel'){
 			Logger::write(__FILE__,__LINE__, "exec movel", $this->verbose);
 			$this->execFixo();
 			return;
 		} else if($tipo == 'fixo'){
 			$this->execFixo();
+			return;
 		} else if($tipo == 'servico'){
 			$this->execServico();
+			return;
 		}
 	}
 

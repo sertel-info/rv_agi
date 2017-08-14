@@ -33,21 +33,24 @@ class Numero {
 
 	public function setParts(){
 		$numero_destino = $this->numero_completo;
+
 		$codArea = $this->ddd;
 
 		//$tipo = 'interno';
 		$digito=substr($numero_destino, -9, 1); /** 02121 964221082 -- NUMERO COM OPERADORA, ZERO E DDD **/
-		preg_match("/^(00|0|9090|90)?(([0-9]{2})?([0-9]{2}))?(([0-9])[0-9]{7,})|([0-9]{3,5})/m", $numero_destino, $mts);
+		preg_match("/(00|0|9090|90)?(([0-9]{2})?([0-9]{2}))?(([0-9])[0-9]{7,})|([0-9]{3,5})/m", $numero_destino, $mts);
 
-		/*Logger::write(__FILE__, __LINE__,'OPERADORA E DDD --> ' .$mts[2], $this->verbose);
+		Logger::write(__FILE__, __LINE__,'OPERADORA E DDD --> ' .$mts[2], $this->verbose);
 		Logger::write(__FILE__, __LINE__,'OPERADORA ->> ' .$mts[3], $this->verbose);
 		Logger::write(__FILE__, __LINE__,'DDD -->' .$mts[4], $this->verbose);
 		Logger::write(__FILE__, __LINE__,'NUMERO DE DESTINO --> ' .$mts[5], $this->verbose);
-		Logger::write(__FILE__, __LINE__,'DIGITO IDENTIFICADOR --> ' .$mts[6], $this->verbose);*/
+		Logger::write(__FILE__, __LINE__,'DIGITO IDENTIFICADOR --> ' .$mts[6], $this->verbose);
+		//*/
 
-		/*nonoDigito = array('11','12','13','14','15','16','17','18','19','21','22','24','27','28','31','32','33','34','35','37','38','61','62','64','65','63','66','67','68','69','71','72','73','74','75','77','79','91','92','93','94','95','96','97','98','99');*/
+		//nonoDigito = array('11','12','13','14','15','16','17','18','19','21','22','24','27','28','31','32','33','34','35','37','38','61','62','64','65','63','66','67','68','69','71','72','73','74','75','77','79','91','92','93','94','95','96','97','98','99');*/
 
 		$nextel = array('77','78');
+
 
 		if(strlen($numero_destino) < 7){
 			
@@ -63,6 +66,11 @@ class Numero {
 
 			return;
 
+		} else if ($mts[1] == "00"){
+		
+			Logger::write(__FILE__, __LINE__,'NUMERO DDI !!!! ' .$mts[6], $this->verbose);
+			$this->isDDI = true;
+			$tipo = "ddi";
 		} else if(strlen($mts[5])==8 && in_array(substr($mts[5],0,2),$nextel)){
 							
 			if($codArea!=$mts[4]){
@@ -107,8 +115,8 @@ class Numero {
 			$tipo = 'fixo';
 							
 		} else {
-			Logger::write(__FILE__, __LINE__, 'NUMERO EM FORMATO DESCNOHECIDO: '.$this->numero_completo, $this->verbose);
-			$tipo = null;
+			Logger::write(__FILE__, __LINE__, 'NUMERO EM FORMATO DESCONHECIDO: '.$this->numero_completo, $this->verbose);
+			$this->tipo = null;
 			$this->numero = $this->numero_completo;
 			return;			
 		}
@@ -187,6 +195,10 @@ class Numero {
 
 	public function getNumero(){
 		return $this->numero;
+	}
+
+	public function isDDI(){
+		return $this->isDDI;
 	}
 
 	public function getDDD(){

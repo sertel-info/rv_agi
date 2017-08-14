@@ -16,7 +16,11 @@ require_once __DIR__."/Models/Linhas/DadosAutenticacaoLinhas.php";
 require_once __DIR__."/Models/Linhas/DadosConfiguracoesLinhas.php";
 require_once __DIR__."/Models/Linhas/Linhas.php";
 require_once __DIR__."/Models/Logs/Gravacoes.php";
-require_once __DIR__."/Models/Uras/Uras.php";
+
+//remover
+require_once __DIR__."/Models/Notificacoes/Notificacoes.php";
+require_once __DIR__."/Models/Notificacoes/NotificacoesUsers.php";
+require_once __DIR__."/Classes/Notificacoes/AGINotificationMessageCompiler.php";
 
 date_default_timezone_set('America/Sao_Paulo');
 
@@ -41,6 +45,7 @@ $ligacao->setTipo("interna");
 
 Logger::write(__FILE__,__LINE__, "Exten: ".$ligacao->getExten(), $verbose);
 Logger::write(__FILE__,__LINE__, "Callerid: ".$ligacao->getCallerId(), $verbose);
+
 
 $autenticacao_ligador = DadosConfiguracoesLinhas::where('callerid', $callerid->getNumeroCompleto())->first();
 
@@ -73,6 +78,8 @@ if(!$autenticacao_receptor){
 		foreach ($verif_permissoes->getErros() as $erro){
 			Logger::write(__FILE__,__LINE__, $erro, $verbose);
 		}
+
+		$agi->exec("PlayBack", "noRota");
 		exit;
 	}
 
@@ -112,6 +119,24 @@ if( $receptor->assinante->facilidades->saudacoes == 1 &&
 
 $ligacao->setLinha($receptor);
 $ligacao->verificaSigaMe();
+
+// REMOVEEEEEEEEEEEEEEEEEEE
+Logger::write(__FILE__,__LINE__, "Começando notificações ");
+$msg_compiler = new AGINotificationMessageCompiler();
+	$notifications = Notificacoes::where('escutar_evento', 'CreditosAcabando')->get();
+	$assinante = $ligador->assinante;
+	foreach($notifications as $notification){
+		$notification_user = new NotificacoesUsers();
+   		$compiled_msg = $msg_compiler->compile($notification->mensagem, $assinante);
+   		Logger::write(__FILE__,__LINE__, "Compiled msg ".$compiled_msg);
+
+   		$notification_user->vista = false;
+        $notification_user->notificacao_id = $notification->id;
+        $notification_user->user_id = $assinante->user->id;
+        $notification_user->mensagem_compilada = $compiled_msg;
+        $notification_user->save();
+	}
+//EEEEEEEEEEEEEEEEEEEEEEER
 
 $dial = new Dial($ligacao);
 
