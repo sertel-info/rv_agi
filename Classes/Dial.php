@@ -215,6 +215,7 @@ class Dial{
 
 		return $dial_string;
 	}
+	
 
 	public function execServico(){
 		Logger::write(__FILE__,__LINE__, "exec servico", $this->verbose);
