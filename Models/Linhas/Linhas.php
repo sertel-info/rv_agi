@@ -91,6 +91,6 @@ class Linhas extends Model
     		return $this->assinante->planos;
     	}
 
-    	return $this->hasOne(Planos::class, 'plano', 'id')->first();
+    	return $this->hasOne(Planos::class, 'plano', 'id');
     }
 }

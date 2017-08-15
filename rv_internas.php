@@ -121,7 +121,7 @@ $ligacao->setLinha($receptor);
 $ligacao->verificaSigaMe();
 
 // REMOVEEEEEEEEEEEEEEEEEEE
-Logger::write(__FILE__,__LINE__, "Começando notificações ");
+/*Logger::write(__FILE__,__LINE__, "Começando notificações ");
 $msg_compiler = new AGINotificationMessageCompiler();
 	$notifications = Notificacoes::where('escutar_evento', 'CreditosAcabando')->get();
 	$assinante = $ligador->assinante;
@@ -135,7 +135,7 @@ $msg_compiler = new AGINotificationMessageCompiler();
         $notification_user->user_id = $assinante->user->id;
         $notification_user->mensagem_compilada = $compiled_msg;
         $notification_user->save();
-	}
+	}*/
 //EEEEEEEEEEEEEEEEEEEEEEER
 
 $dial = new Dial($ligacao);
