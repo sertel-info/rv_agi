@@ -41,7 +41,7 @@ if(!$autenticacao_linha){
 
 } 
 
-$linha = Linhas::complete()->find($autenticacao_linha->linha_id);
+$linha = Linhas::complete()->find($autenticacao_linha->    linha_id);
 
 
 $titulo_tarifa = "valor";
