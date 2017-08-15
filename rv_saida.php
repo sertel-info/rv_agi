@@ -114,18 +114,20 @@ $ligacao->verificaCadeado();
 $titulo_tarifa = "valor";
 
 if($exten->isDDD()){
-	$titulo_tarifa .= $exten->getTipo()."_ddd";
+	$titulo_tarifa .= "_".$exten->getTipo()."_ddd";
 } else if($exten->isDDI()){
 	$titulo_tarifa .= "_ddi";
 } else {
-	$titulo_tarifa .= $exten->getTipo()."_local";
+	$titulo_tarifa .= "_".$exten->getTipo()."_local";
 }
 
+Logger::write(__FILE__,__LINE__, "Título tarifa: ".$titulo_tarifa, 1);
+
 $ligacao->setTarifa($linha->assinante->planos()->first()->__get($titulo_tarifa));
+Logger::write(__FILE__,__LINE__, "Tarifa da ligação: ".$ligacao->getTarifa(),1);
 
 $ligacao->setLimiteTempo(BillCalculator::calcTempoMaxLigacao($ligacao));
 
-Logger::write(__FILE__,__LINE__, "Tarifa da ligação: ".$ligacao->getTarifa(),1);
 Logger::write(__FILE__,__LINE__, "Créditos do assinante: ".$linha->assinante->financeiro->creditos,1);
 Logger::write(__FILE__,__LINE__, "Tempo máximo da ligação: ".$ligacao->getLimiteTempo(),1);
 

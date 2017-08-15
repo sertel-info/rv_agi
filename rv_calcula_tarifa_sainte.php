@@ -47,11 +47,11 @@ $linha = Linhas::complete()->find($autenticacao_linha->linha_id);
 $titulo_tarifa = "valor";
 
 if($exten->isDDD()){
-	$titulo_tarifa .= $exten->getTipo()."_ddd";
+	$titulo_tarifa .= "_".$exten->getTipo()."_ddd";
 } else if($exten->isDDI()){
 	$titulo_tarifa .= "_ddi";
 } else {
-	$titulo_tarifa .= $exten->getTipo()."_local";
+	$titulo_tarifa .= "_".$exten->getTipo()."_local";
 }
 
 $tarifa = $linha->plano()->__get($titulo_tarifa);
