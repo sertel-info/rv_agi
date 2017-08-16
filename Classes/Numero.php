@@ -66,8 +66,8 @@ class Numero {
 
 			return;
 
-		} else if ($mts[1] == "00"){
-		
+		} else if (strcmp($mts[1], "00") == 0){
+			
 			Logger::write(__FILE__, __LINE__,'NUMERO DDI !!!! ' .$mts[6], $this->verbose);
 			$this->isDDI = true;
 			$tipo = "ddi";

@@ -54,6 +54,8 @@ if($exten->isDDD()){
 	$titulo_tarifa .= "_".$exten->getTipo()."_local";
 }
 
+Logger::write(__FILE__,__LINE__, "TITULO TARIFA : ".$titulo_tarifa);
+
 $tarifa = $linha->plano()->__get($titulo_tarifa);
 
 Logger::write(__FILE__,__LINE__, "TARIFA: ".$tarifa);

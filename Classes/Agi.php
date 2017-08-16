@@ -1637,7 +1637,7 @@
               }
               if($count >= 5)
               {
-        //            $this->conlog("evaluate error on multiline read for $command");
+                //$this->conlog("evaluate error on multiline read for $command");
                 return $broken;
               }
             }
