@@ -9,7 +9,7 @@ $capsule = new Capsule;
 $capsule->addConnection([
     'driver'    => 'mysql',
     'host'      => 'localhost',
-    'database'  => 'rv_novo',
+    'database'  => 'ramal_virtual',
     'username'  => 'ipbxsertel',
     'password'  => '@ipbxsertel',
     'charset'   => 'utf8',
