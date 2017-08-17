@@ -46,7 +46,7 @@ if(!$did_linha){
 	die(1);
 } 
 
-$linha = Linhas::complete()->find($did_linha);
+$linha = Linhas::complete()->find($did_linha->linha_id);
 $agi->set_variable("CDR(dst_account)", $linha->autenticacao->login_ata);
 
 /** SAUDAÇÕES **/
