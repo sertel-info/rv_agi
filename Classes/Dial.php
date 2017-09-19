@@ -266,7 +266,6 @@ class Dial{
 		$linha = $this->ligacao->getLinha();
 
 		$rotas = $this->getRotas();
-		Logger::write(__LINE__, __FILE__, "R ".var_export($rotas, true) ,true);
 
 		$tentativas = 0;
 		

@@ -16,7 +16,7 @@ class Numero {
 	private $tipo; //fixo ou móvel
 	private $mcdu;
 	private $prefixo;
-	private $verbose = true;
+	private $verbose = false;
 	private $ddd;
 	private $num_operadoras = [
 			"vivo"=>21,
